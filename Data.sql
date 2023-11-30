@@ -7,3 +7,6 @@
 
 -- type materiel
 -- INSERT INTO typeMateriel(typeMateriel) values('Materiel bureatique'),('Materiel Informatique'),('Autre');
+
+-- categorieMateriel
+-- INSERT INTO categorieMateriel(categorieMateriel) values('Ordinateur'),('Lampe'),('Table');
