@@ -13,3 +13,8 @@
 
 -- Depot
 -- INSERT INTO Depot(depot) values('Bibliothteque'),('Autres liru de stockage');
+
+
+-- Article
+-- Materiel
+-- Mouvement de stock
