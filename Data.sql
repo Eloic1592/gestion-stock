@@ -12,7 +12,7 @@
 -- INSERT INTO categorieMateriel(categorieMateriel) values('Ordinateur'),('Lampe'),('Table');
 
 -- Depot
--- INSERT INTO Depot(depot) values('Bibliothteque'),('Autres liru de stockage');
+-- INSERT INTO Depot(depot) values('Bibliotheque'),('Autres lieu de stockage');
 
 
 -- Article
