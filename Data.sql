@@ -1,5 +1,5 @@
 -- Couleur 
--- INSERT INTO couleur(couleur) values('NOIR'),('GRIS');
+-- INSERT INTO couleur(couleur) values('NOIR'),('GRIS'),('BLANC');
 
 -- marque 
 -- INSERT INTO marque(marque) values('TOSHIBA'),('FUJITSU'),('LENOVO'),
@@ -10,3 +10,6 @@
 
 -- categorieMateriel
 -- INSERT INTO categorieMateriel(categorieMateriel) values('Ordinateur'),('Lampe'),('Table');
+
+-- Depot
+-- INSERT INTO Depot(depot) values('Bibliothteque'),('Autres liru de stockage');
