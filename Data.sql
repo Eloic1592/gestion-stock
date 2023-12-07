@@ -6,10 +6,10 @@
 -- ('DELL'),('HP'),('NEC'),('DYNABOOK'),('SONY');
 
 -- type materiel
--- INSERT INTO typeMateriel(typeMateriel) values('Materiel bureatique'),('Materiel Informatique'),('Autre');
+-- INSERT INTO categorieMateriel(categorieMateriel) values('Materiel bureatique'),('Materiel Informatique'),('Autre');
 
 -- categorieMateriel
--- INSERT INTO categorieMateriel(categorieMateriel) values('Ordinateur'),('Lampe'),('Table');
+-- INSERT INTO typeMateriel(typeMateriel) values('Ordinateur'),('Lampe'),('Table');
 
 -- Depot
 -- INSERT INTO Depot(depot) values('Bibliotheque'),('ITU LABS'),('Autres lieu de stockage');

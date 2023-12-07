@@ -34,19 +34,21 @@ CREATE TABLE marque(
    marque VARCHAR2(100) NOT NULL
 );
 
+-- 
+
 Create table couleur(
     id VARCHAR2(50) primary key not null,
     couleur VARCHAR2(50) not null
 );
 
 
--- Type materiel bureautique ou materiel informatique ou autre
+-- Ordinateur,chargeur,clavier,lampe,...
 Create table typeMateriel(
     id VARCHAR2(100) primary key not null,
     typeMateriel VARCHAR2(100) not null
 );
 
--- Ordinateur,chargeur,clavier,lampe,...
+-- Type materiel bureautique ou materiel informatique ou autre
 Create table categorieMateriel(
     id VARCHAR2(100) primary key not null,
     categorieMateriel VARCHAR2(100) not null
