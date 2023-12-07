@@ -1,13 +1,3 @@
--- create FUNCTION GETSeqBatterie
---     RETURN NUMBER IS
---     retour NUMBER;
--- BEGIN
---     SELECT s_batterie.nextval INTO retour FROM dual;
---     return retour;
--- END;
--- /
-
-
 -- type materiel
 CREATE OR REPLACE FUNCTION getseqtypemateriel
    RETURN VARCHAR2 IS

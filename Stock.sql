@@ -1,9 +1,5 @@
 -- Sequence
 
-Create sequence SEQMARQUE Start with 1 increment by 1;
-
-Create sequence SEQCOULEUR Start with 1 increment by 1;
-
 Create sequence SEQTYPEMATERIEL start with 1 increment by 1;
 
 Create sequence SEQCATEGORIEMATERIEL start with 1 increment by 1;
@@ -28,20 +24,6 @@ Create sequence SEQFACTURE start with 1 increment by 1;
 
 Create sequence SEQDETAILSFACTURE start with 1 increment by 1;
 
-
-CREATE TABLE marque(
-   id VARCHAR2(50) PRIMARY KEY NOT NULL,
-   marque VARCHAR2(100) NOT NULL
-);
-
--- 
-
-Create table couleur(
-    id VARCHAR2(50) primary key not null,
-    couleur VARCHAR2(50) not null
-);
-
-
 -- Ordinateur,chargeur,clavier,lampe,...
 Create table typeMateriel(
     id VARCHAR2(100) primary key not null,
@@ -57,14 +39,14 @@ Create table categorieMateriel(
 
 Create table article(
     id VARCHAR2(50) primary key not null,
-    idmarque  VARCHAR2(100) not null,
+    marque VARCHAR2(100) not null,
     modele CLOB,
     description CLOB,
     code CLOB,
-    PU number(10,2) not null
+    PU number(10,2) not null,
+    marque varchar2(100) not null
 );
 
-ALTER TABLE article ADD foreign key(idmarque) references marque(id);
 
 Create table materiel(
     id VARCHAR2(50) primary key not null,
@@ -72,16 +54,15 @@ Create table materiel(
     idcategorieMateriel VARCHAR2(100) not null,
     idarticle VARCHAR2(100) not null,
     numSerie VARCHAR2(100) not null,
-    idcouleur VARCHAR2(100) not null,
     prixVente number(10,2) not null,
     caution number(10,2) not null,
-    statut VARCHAR2(100) not null
+    statut VARCHAR2(100) not null,
+    couleur VARCHAR2(100) not null
 );
 
 ALTER TABLE materiel ADD foreign key(idtypeMateriel) references typeMateriel(id);
 ALTER TABLE materiel ADD foreign key(idcategorieMateriel) references categorieMateriel(id);
 ALTER TABLE materiel ADD foreign key(idarticle) references article(id);
-ALTER TABLE materiel ADD foreign key(idcouleur) references couleur(id);
 
 Create table depot(
     id VARCHAR2(50) primary key not null, 
