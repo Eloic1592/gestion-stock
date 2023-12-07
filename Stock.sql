@@ -20,9 +20,9 @@ Create sequence SEQNATUREMOUVEMENT start with 1 increment by 1;
 
 Create sequence SEQMOUVEMENT start with 1 increment by 1;
 
-Create sequence SEQDETAILMOUVEMENT start with 1 increment by 1;
+Create sequence SEQDETAILMOUVEMENTPHYSIQUE start with 1 increment by 1;
 
-Create sequence SEQMOUVEMENT start with 1 increment by 1;
+Create sequence SEQDETAILMOUVEMENTFICTIF start with 1 increment by 1;
 
 Create sequence SEQFACTURE start with 1 increment by 1;
 
