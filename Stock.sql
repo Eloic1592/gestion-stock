@@ -147,28 +147,31 @@ ALTER TABLE detailmouvementfictif ADD foreign key(idmateriel) references materie
 ALTER TABLE detailmouvementfictif ADD foreign key(iddepot) references depot(id);
 
 
-Create table facture(
+Create table facturemateriel(
     id VARCHAR2(50) primary key not null,
     dateFacture TIMESTAMP default current_timestamp,
     nomFournisseur VARCHAR2(100) not null,
+    nomClient VARCHAR2(100) not null,
+    telephoneClient VARCHAR2(100) not null,
+    CINClient varchar2(50),
     idmouvement VARCHAR2(100) not null,
     statut VARCHAR2(50) not null
 );
 
-ALTER TABLE facture ADD foreign key(idmouvement) references mouvementStock(id);
+ALTER TABLE facturemateriel ADD foreign key(idmouvement) references mouvementStock(id);
 
 
-Create table detailsfacture(
+Create table detailsfacturemateriel(
     id VARCHAR2(50) primary key not null,
-    idfacture VARCHAR2(100) not null,
+    idfacturemateriel VARCHAR2(100) not null,
     idarticle VARCHAR2(100) not null,
     quantite number(10,2) not null,
     PU number(10,2) not null,
     total number(10,2) not null
 );
 
-ALTER TABLE detailsfacture ADD foreign key(idfacture) references facture(id);
-ALTER TABLE detailsfacture ADD foreign key(idarticle) references article(id);
+ALTER TABLE detailsfacturemateriel ADD foreign key(idfacturemateriel) references facturemateriel(id);
+ALTER TABLE detailsfacturemateriel ADD foreign key(idarticle) references article(id);
 
 -- Tables
 

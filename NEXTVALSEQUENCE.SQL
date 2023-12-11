@@ -83,7 +83,7 @@ END;
 
 
 --  FACTURE
-CREATE OR REPLACE FUNCTION getseqfacture
+CREATE OR REPLACE FUNCTION getseqfacturemateriel
   RETURN NUMBER IS
   retour NUMBER;
 BEGIN
@@ -92,7 +92,7 @@ BEGIN
 END;
 
 -- DETAILSFACTURE
-CREATE OR REPLACE FUNCTION getseqdetailfacture
+CREATE OR REPLACE FUNCTION getseqdetailfacturemateriel
   RETURN NUMBER IS
   retour NUMBER;
 BEGIN
