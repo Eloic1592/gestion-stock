@@ -56,16 +56,17 @@ Create table commande(
 -- Ici idclient= fournisseur
 Alter table commande add foreign key (idclient) references client(idclient);
 
-Create table detailscommande(
-    iddetailscommande varchar(50) not null primary key,
-    idcommande varchar2(50) not null,
-    idarticle  varchar2(50) not null,
-    description clob,
-    quantite number(10,2) not null,
-    PU number(10,2) not null default 0,
-    total number(10,2) not null,
-    statut number default 0
+CREATE TABLE detailscommande(
+   iddetailscommande varchar(50) NOT NULL PRIMARY KEY,
+   idcommande varchar2(50) NOT NULL,
+   idarticle varchar2(50) NOT NULL,
+   description CLOB,
+   quantite number(10,2) NOT NULL,
+   PU number(10,2) NOT NULL DEFAULT 0,
+   total number(12,2),
+   statut number DEFAULT 0
 );
+
 
 ALTER TABLE detailscommande ADD foreign key(idcommande) references commande(idcommande);
 ALTER TABLE detailscommande ADD foreign key(idarticle) references article(idarticle);
@@ -119,7 +120,7 @@ Create table detailboncommande(
     idarticle VARCHAR2(100) not null,
     description clob,
     quantite number(10,2) not null,
-    PU number(10,2) not null default 0,
+    PU number(10,2) not null ,
     total number(10,2) not null
 );
 
@@ -185,11 +186,11 @@ CREATE TABLE detailmouvementphysique(
    idmouvement VARCHAR2(50) NOT NULL,
    idarticle VARCHAR2(50) NOT NULL,
    quantite NUMBER(10,2) NOT NULL,
-   PU number(10,2) not null default 0,
+   PU number(10,2) not null,
    prixStock NUMBER(10,2) NOT NULL,
    total NUMBER(10,2) NOT NULL,
    iddepot VARCHAR2(50) NOT NULL,
-   description clob,
+   description CLOB,
    commentaire CLOB,
    statut number default 0
 );
@@ -207,7 +208,7 @@ Create table detailmouvementfictif(
     dateDeb TIMESTAMP  default current_timestamp,
     dateFin TIMESTAMP  default null,
     idetudiant varchar(50) not null,
-    caution NUMBER(10,2) DEFAULT 0,
+    caution NUMBER(10,2),
     idmateriel varchar2(50) not null,
     iddepot varchar(50) not null,
     description clob,
@@ -238,7 +239,7 @@ Create table detailsfacturemateriel(
     idfacturemateriel VARCHAR2(100) not null,
     idarticle VARCHAR2(100) not null,
     quantite number(10,2) not null,
-    PU number(10,2) not null default 0,
+    PU number(10,2) not null,
     total number(10,2) not null
 );
 ALTER TABLE detailsfacturemateriel ADD foreign key(idfacturemateriel) references facturemateriel(idfacturemateriel);
