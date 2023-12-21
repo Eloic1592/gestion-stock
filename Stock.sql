@@ -246,14 +246,20 @@ ALTER TABLE detailsfacturemateriel ADD foreign key(idfacturemateriel) references
 ALTER TABLE detailsfacturemateriel ADD foreign key(idarticle) references article(idarticle);
 
 
+
+-- Mode  de paiement deja compris dans la bdd
+
 create table paiement(
     id VARCHAR2(50) primary key not null,
     idclient varchar2(100) not null,
     idfacturemateriel varchar2(100) not null,
+    idmodepaiement varchar(100) not null,
+    datepaiement timestamp default current_timestamp
 );
 
 ALTER TABLE paiement ADD foreign key(idclient) references client(idclient);
 ALTER TABLE paiement ADD foreign key(idfacturemateriel) references facturemateriel(idfacturemateriel);
+ALTER TABLE paiement ADD foreign key(idmodepaiement) references modepaiement(id);
 
 
 -- Tables
