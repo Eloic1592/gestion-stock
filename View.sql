@@ -22,6 +22,11 @@ Create or replace view mouvement_physique as
 select dmp.IDDETAILMOUVEMENTPHYSIQUE,
        ms.IDMOUVEMENTSTOCK,
        ms.DATEDEPOT,
+       case ms.TYPEMOUVEMENT WHEN 1 THEN
+           'ENTREE'
+           WHEN -1 THEN
+            'SORTIE'
+        END as MOUVEMENT,
        nm.NATUREMOUVEMENT,
        a.MARQUE,
        a.MODELE,
@@ -45,6 +50,11 @@ Create or replace view mouvement_fictif as
 select dmf.IDDETAILMOUVEMENTFICTIF,
        ms.IDMOUVEMENTSTOCK,
        ms.DATEDEPOT,
+       case ms.TYPEMOUVEMENT WHEN 1 THEN
+                                 'ENTREE'
+                             WHEN -1 THEN
+                                 'SORTIE'
+           END as MOUVEMENT,
        nm.NATUREMOUVEMENT,
        m.MARQUE,
        m.MODELE,
@@ -53,7 +63,7 @@ select dmf.IDDETAILMOUVEMENTFICTIF,
        d.DEPOT,
        dmf.DATEDEB,
        dmf.DATEFIN,
-       e.ID,
+       e.ID as IDETUDIANT,
        e.NOM,
        e.PRENOM,
        dmf.COMMENTAIRE,
