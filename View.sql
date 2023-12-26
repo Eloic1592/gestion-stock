@@ -22,6 +22,11 @@ Create or replace view mouvement_physique as
 select dmp.IDDETAILMOUVEMENTPHYSIQUE,
        ms.IDMOUVEMENTSTOCK,
        ms.DATEDEPOT,
+       case ms.TYPEMOUVEMENT WHEN 1 THEN
+           'ENTREE'
+           WHEN -1 THEN
+            'SORTIE'
+        END as MOUVEMENT,
        nm.NATUREMOUVEMENT,
        a.MARQUE,
        a.MODELE,
@@ -45,6 +50,11 @@ Create or replace view mouvement_fictif as
 select dmf.IDDETAILMOUVEMENTFICTIF,
        ms.IDMOUVEMENTSTOCK,
        ms.DATEDEPOT,
+       case ms.TYPEMOUVEMENT WHEN 1 THEN
+                                 'ENTREE'
+                             WHEN -1 THEN
+                                 'SORTIE'
+           END as MOUVEMENT,
        nm.NATUREMOUVEMENT,
        m.MARQUE,
        m.MODELE,
@@ -53,7 +63,7 @@ select dmf.IDDETAILMOUVEMENTFICTIF,
        d.DEPOT,
        dmf.DATEDEB,
        dmf.DATEFIN,
-       e.ID,
+       e.ID as IDETUDIANT,
        e.NOM,
        e.PRENOM,
        dmf.COMMENTAIRE,
@@ -99,3 +109,61 @@ from PAIEMENT p
          join MODEPAIEMENT mp on p.IDMODEPAIEMENT = mp.ID;
 
 select * from paiement_facture;
+
+
+-- Commande
+Drop view detail_commande;
+
+Create or replace view detail_commande as
+select dc.IDDETAILSCOMMANDE,
+       c.DATECOMMANDE,
+       a.MARQUE,
+       a.MODELE,
+       dc.IDCOMMANDE,
+       dc.DESCRIPTION,
+       dc.QUANTITE,
+       dc.PU,
+       dc.TOTAL,
+       dc.STATUT
+
+from DETAILSCOMMANDE dc
+         join ARTICLE a on dc.IDARTICLE = a.IDARTICLE
+         join COMMANDE c on dc.IDCOMMANDE = c.IDCOMMANDE;
+
+-- Devis
+
+Drop view detail_devis;
+
+Create or replace view detail_devis as
+select dv.IDDETAILDEVIS,
+       c.IDDEVIS,
+       a.MARQUE,
+       a.MODELE,
+       dv.DESCRIPTION,
+       dv.QUANTITE,
+       dv.PU,
+       dv.TOTAL
+
+from DETAILDEVIS dv
+         join ARTICLE a on dv.IDARTICLE = a.IDARTICLE
+         join DEVIS c on dv.IDDEVIS = c.IDDEVIS;
+
+-- Detail bon de commande
+drop view v_detail_bon;
+
+CREATE OR REPLACE VIEW v_detail_bon AS
+SELECT
+    db.IDDETAILBONCOMMANDE,
+    db.IDBONCOMMANDE,
+    BC.DATEBONCOMMANDE,
+    a.MARQUE,
+    a.MODELE,
+    db.DESCRIPTION,
+    db.QUANTITE,
+    db.PU,
+    db.TOTAL
+FROM DETAILBONCOMMANDE db
+         JOIN ARTICLE a ON a.IDARTICLE = a.IDARTICLE
+         JOIN DETAIL_FACTURE DF ON a.IDARTICLE = DF.IDARTICLE
+         JOIN BONCOMMANDE BC ON bc.IDBONCOMMANDE = db.IDBONCOMMANDE;
+
