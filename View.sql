@@ -77,6 +77,22 @@ from  DETAILMOUVEMENTFICTIF dmf
           join ETUDIANT E ON E.ID=dmf.IDETUDIANT;
 
 -- Facture
+drop view client_facture;
+Create or replace view client_facture as
+select fm.IDFACTUREMATERIEL,
+       fm.IDMOUVEMENT,
+       fm.DATEFACTURE,
+       c.NOM,
+       c.TELEPHONE,
+       c.NIF,
+       c.NUMSTAT,
+       c.ADRESSE,
+       c.QUITTANCE,
+       fm.STATUT
+from FACTUREMATERIEL fm
+         join client c on fm.IDCLIENT = c.IDCLIENT;
+
+
 drop view detail_facture;
 Create or replace  view detail_facture  as
 select df.IDDETAILSFACTUREMATERIEL,
