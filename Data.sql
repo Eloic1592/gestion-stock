@@ -27,3 +27,13 @@ INSERT INTO natureMouvement(idnatureMouvement,natureMouvement) values(getseqnatu
 -- Depot
 INSERT INTO Depot(iddepot,depot) values(getseqdepot,'Bibliotheque');
 INSERT INTO Depot(iddepot,depot) values(getseqdepot,'Salle 6');
+
+
+
+-- Article
+-- Insert test data into the 'article' table
+INSERT INTO article (idarticle, marque, modele, description, codearticle)
+VALUES (getseqarticle, 'BrandA', 'ModelA', 'DescriptionA', 'CodeA');
+
+INSERT INTO article (idarticle, marque, modele, description, codearticle)
+VALUES (getseqarticle, 'BrandB', 'ModelB', 'DescriptionB', 'CodeB');
