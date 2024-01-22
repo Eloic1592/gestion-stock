@@ -27,45 +27,46 @@ CREATE SEQUENCE SEQPAIEMENT START WITH 1 INCREMENT BY 1;
 
 -- Ordinateur,chargeur,clavier,lampe,...
 Create table typeMateriel(
-    idtypeMateriel VARCHAR2(100) primary key not null,
-    typeMateriel VARCHAR2(100) not null
+    idtypeMateriel VARCHAR2(100) PRIMARY KEY NOT NULL ,
+    typeMateriel VARCHAR2(100) NOT NULL 
 );
 
 -- Type materiel bureautique ou materiel informatique ou autre
 Create table categorieMateriel(
-    idcategorieMateriel VARCHAR2(100) primary key not null,
-    categorieMateriel VARCHAR2(100) not null
+    idcategorieMateriel VARCHAR2(100) PRIMARY KEY NOT NULL ,
+    categorieMateriel VARCHAR2(100) NOT NULL 
 );
 
 
 Create table article(
-    idarticle VARCHAR2(50) primary key not null,
-    marque VARCHAR2(100) not null,
+    idarticle VARCHAR2(50) PRIMARY KEY NOT NULL ,
+    marque VARCHAR2(100) NOT NULL ,
     modele CLOB,
     description CLOB,
     codearticle CLOB
 );
 
 Create table commande(
-    idcommande varchar2(50) not null primary key,
-    idclient varchar2(100) not null, 
-    datecommande timestamp default current_timestamp,
-    statut number default 0
+    idcommande varchar2(50) NOT NULL  PRIMARY KEY,
+    idclient varchar2(100) NOT NULL , 
+    datecommande timestampDEFAULT  current_timestamp,
+    statut number DEFAULT  0
 );
 
 -- Ici idclient= fournisseur
 Alter table commande add foreign key (idclient) references client(idclient);
 
 CREATE TABLE detailscommande(
-   iddetailscommande varchar(50) NOT NULL PRIMARY KEY,
-   idcommande varchar2(50) NOT NULL,
-   idarticle varchar2(50) NOT NULL,
+   iddetailscommande varchar(50) NOT NULL  PRIMARY KEY,
+   idcommande varchar2(50) NOT NULL ,
+   idarticle varchar2(50) NOT NULL ,
    description CLOB,
-   quantite number(10,2) NOT NULL,
-   PU number(10,2) NOT NULL DEFAULT 0,
+   quantite number(10,2) NOT NULL ,
+   PU number(10,2)DEFAULT  0 NOT NULL ,
    total number(12,2),
-   statut number DEFAULT 0
+   statut number DEFAULT  0
 );
+
 
 
 ALTER TABLE detailscommande ADD foreign key(idcommande) references commande(idcommande);
@@ -75,11 +76,11 @@ ALTER TABLE detailscommande ADD foreign key(idarticle) references article(idarti
 
 
 Create table devis(
-    iddevis VARCHAR2(50) primary key not null,
-    idcommande VARCHAR2(50) not null,
-    idclient varchar2(100) not null, 
-    datedevis TIMESTAMP default current_timestamp,
-    statut number default 0
+    iddevis VARCHAR2(50) PRIMARY KEY NOT NULL ,
+    idcommande VARCHAR2(50) NOT NULL ,
+    idclient varchar2(100) NOT NULL , 
+    datedevis TIMESTAMPDEFAULT  current_timestamp,
+    statut number DEFAULT  0
 );
 
 -- Ici idclient= fournisseur
@@ -91,13 +92,13 @@ Alter table devis add foreign key (idclient) references client(idclient);
 
 
 Create table detaildevis(
-    iddetaildevis varchar(50) primary key not null,
-    iddevis  VARCHAR2(100) not null,
-    idarticle VARCHAR2(100) not null,
-    description clob,
-    quantite number(10,2) not null,
-    PU number(10,2) not null default 0,
-    total number(10,2) not null
+    iddetaildevis varchar(50) PRIMARY KEY,
+    iddevis  VARCHAR2(100) NOT NULL ,
+    idarticle VARCHAR2(100) NOT NULL ,
+    description CLOB,
+    quantite number(10,2) NOT NULL ,
+    PU number(10,2)DEFAULT  0 NOT NULL ,
+    total number(10,2)DEFAULT  0 NOT NULL 
 );
 
 ALTER TABLE detaildevis ADD foreign key(iddevis) references devis(iddevis);
@@ -105,23 +106,23 @@ ALTER TABLE detaildevis ADD foreign key(idarticle) references article(idarticle)
 
 
 Create table boncommande(
-    idboncommande varchar2(100) not null primary key,
-    idclient varchar2(100) not null, 
-    dateboncommande TIMESTAMP default current_timestamp,
-    statut number default 0
+    idboncommande varchar2(100) NOT NULL  PRIMARY KEY,
+    idclient varchar2(100) NOT NULL , 
+    dateboncommande TIMESTAMPDEFAULT  current_timestamp,
+    statut number DEFAULT  0
 );
 
 Alter table boncommande add foreign key (idclient) references client(idclient);
 
 
 Create table detailboncommande(
-    iddetailboncommande varchar2(100) not null primary key,
-    idboncommande varchar2(100) not null,
-    idarticle VARCHAR2(100) not null,
+    iddetailboncommande varchar2(100) NOT NULL  PRIMARY KEY,
+    idboncommande varchar2(100) NOT NULL ,
+    idarticle VARCHAR2(100) NOT NULL ,
     description clob,
-    quantite number(10,2) not null,
-    PU number(10,2) not null ,
-    total number(10,2) not null
+    quantite number(10,2) NOT NULL ,
+    PU number(10,2) NOT NULL  ,
+    total number(10,2) NOT NULL 
 );
 
 ALTER TABLE detailboncommande ADD foreign key(idarticle) references article(idarticle);
@@ -129,27 +130,27 @@ Alter table detailboncommande add foreign key(idboncommande) references boncomma
 
 
 Create table bonlivraison(
-    id varchar2(100) not null primary key,
-    idclient varchar2(100) not null, 
-    idboncommande varchar2(100) not null,
-    datebonlivraison TIMESTAMP default current_timestamp,
-    statut number default 0
+    id varchar2(100) NOT NULL  PRIMARY KEY,
+    idclient varchar2(100) NOT NULL , 
+    idboncommande varchar2(100) NOT NULL ,
+    datebonlivraison TIMESTAMPDEFAULT  current_timestamp,
+    statut number DEFAULT  0
 );
 Alter table bonlivraison add foreign key (idclient) references client(idclient);
 Alter table bonlivraison add foreign key(idboncommande) references boncommande(idboncommande);
 
 
 Create table materiel(
-    idmateriel VARCHAR2(50) primary key not null,
-    idtypeMateriel VARCHAR2(100) not null,
-    idcategorieMateriel VARCHAR2(100) not null,
-    idarticle VARCHAR2(100) not null,
-    numSerie VARCHAR2(100) not null,
+    idmateriel VARCHAR2(50) PRIMARY KEY NOT NULL ,
+    idtypeMateriel VARCHAR2(100) NOT NULL ,
+    idcategorieMateriel VARCHAR2(100) NOT NULL ,
+    idarticle VARCHAR2(100) NOT NULL ,
+    numSerie VARCHAR2(100) NOT NULL ,
     description clob,
-    prixVente number(10,2) not null,
-    caution number(10,2) not null,
-    couleur VARCHAR2(100) not null,
-    statut number default 0
+    prixVente number(10,2) NOT NULL ,
+    caution number(10,2) NOT NULL ,
+    couleur VARCHAR2(100) NOT NULL ,
+    statut number DEFAULT  0
 );
 
 ALTER TABLE materiel ADD foreign key(idtypeMateriel) references typeMateriel(idtypeMateriel);
@@ -158,22 +159,22 @@ ALTER TABLE materiel ADD foreign key(idarticle) references article(idarticle);
 
 
 Create table depot(
-    iddepot VARCHAR2(50) primary key not null, 
-    depot varchar(100) not null
+    iddepot VARCHAR2(50) PRIMARY KEY NOT NULL , 
+    depot varchar(100) NOT NULL 
 );
 
 
 Create table natureMouvement(
-    idnatureMouvement VARCHAR2(50) primary key not null,
-    natureMouvement varchar2(100) not null
+    idnatureMouvement VARCHAR2(50) PRIMARY KEY NOT NULL ,
+    natureMouvement varchar2(100) NOT NULL 
 );
 
 Create table mouvementStock(
-    idmouvementStock VARCHAR2(50) primary key not null,
-    dateDepot TIMESTAMP  default current_timestamp,
-    typeMouvement number not null, /*ENTREE OU SORTIE (1,-1)*/
-    idnatureMouvement VARCHAR2(50) NOT NULL,
-    statut number default 0
+    idmouvementStock VARCHAR2(50) PRIMARY KEY NOT NULL ,
+    dateDepot TIMESTAMP DEFAULT  current_timestamp,
+    typeMouvement number NOT NULL , /*ENTREE OU SORTIE (1,-1)*/
+    idnatureMouvement VARCHAR2(50) NOT NULL ,
+    statut number DEFAULT  0
 );
 
 ALTER TABLE mouvementStock ADD CONSTRAINT typeMouvementcheck CHECK(typeMouvement IN(1,-1));
@@ -182,17 +183,17 @@ ALTER TABLE mouvementStock ADD foreign key(idnatureMouvement) references natureM
 
 -- ENTREE SORTIE PHYSIQUE
 CREATE TABLE detailmouvementphysique(
-   iddetailmouvementphysique VARCHAR2(50) PRIMARY KEY NOT NULL,
-   idmouvement VARCHAR2(50) NOT NULL,
-   idarticle VARCHAR2(50) NOT NULL,
-   quantite NUMBER(10,2) NOT NULL,
-   PU number(10,2) not null,
-   prixStock NUMBER(10,2) NOT NULL,
-   total NUMBER(10,2) NOT NULL,
-   iddepot VARCHAR2(50) NOT NULL,
+   iddetailmouvementphysique VARCHAR2(50) PRIMARY KEY NOT NULL ,
+   idmouvement VARCHAR2(50) NOT NULL ,
+   idarticle VARCHAR2(50) NOT NULL ,
+   quantite NUMBER(10,2) NOT NULL ,
+   PU number(10,2) NOT NULL ,
+   prixStock NUMBER(10,2) NOT NULL ,
+   total NUMBER(10,2) NOT NULL ,
+   iddepot VARCHAR2(50) NOT NULL ,
    description CLOB,
    commentaire CLOB,
-   statut number default 0
+   statut number DEFAULT  0
 );
 
 
@@ -203,17 +204,17 @@ ALTER TABLE detailmouvementphysique ADD foreign key(iddepot) references depot(id
 
 -- ENTREE SORTIE FICTIF
 Create table detailmouvementfictif(
-    iddetailmouvementfictif VARCHAR2(50) primary key not null,
-    idmouvement varchar(50) not null,
-    dateDeb TIMESTAMP  default current_timestamp,
-    dateFin TIMESTAMP  default null,
-    idetudiant varchar(50) not null,
+    iddetailmouvementfictif VARCHAR2(50) PRIMARY KEY NOT NULL ,
+    idmouvement varchar(50) NOT NULL ,
+    dateDeb TIMESTAMP DEFAULT  current_timestamp,
+    dateFin TIMESTAMP DEFAULT  NULL,
+    idetudiant varchar(50) NOT NULL ,
     caution NUMBER(10,2),
-    idmateriel varchar2(50) not null,
-    iddepot varchar(50) not null,
+    idmateriel varchar2(50) NOT NULL ,
+    iddepot varchar(50) NOT NULL ,
     description clob,
     commentaire CLOB,
-    statut number default 0
+    statut number DEFAULT  0
 );
 ALTER TABLE detailmouvementfictif ADD foreign key(idmouvement) references mouvementStock(idmouvementStock);
 ALTER TABLE detailmouvementfictif ADD foreign key(idetudiant) references etudiant(id);
@@ -222,11 +223,11 @@ ALTER TABLE detailmouvementfictif ADD foreign key(iddepot) references depot(idde
 
 
 Create table facturemateriel(
-    idfacturemateriel VARCHAR2(50) primary key not null,
-    dateFacture TIMESTAMP default current_timestamp,
-    idclient varchar2(100) not null, 
-    idmouvement VARCHAR2(100) not null,
-    statut number default 0
+    idfacturemateriel VARCHAR2(50) PRIMARY KEY NOT NULL ,
+    dateFacture TIMESTAMPDEFAULT  current_timestamp,
+    idclient varchar2(100) NOT NULL , 
+    idmouvement VARCHAR2(100) NOT NULL ,
+    statut number DEFAULT  0
 );
 
 ALTER TABLE facturemateriel ADD foreign key(idmouvement) references mouvementStock(idmouvementStock);
@@ -235,12 +236,12 @@ ALTER TABLE facturemateriel ADD foreign key(idclient) references client(idclient
 
 
 Create table detailsfacturemateriel(
-    iddetailsfacturemateriel VARCHAR2(50) primary key not null,
-    idfacturemateriel VARCHAR2(100) not null,
-    idarticle VARCHAR2(100) not null,
-    quantite number(10,2) not null,
-    PU number(10,2) not null,
-    total number(10,2) not null
+    iddetailsfacturemateriel VARCHAR2(50) PRIMARY KEY NOT NULL ,
+    idfacturemateriel VARCHAR2(100) NOT NULL ,
+    idarticle VARCHAR2(100) NOT NULL ,
+    quantite number(10,2) NOT NULL ,
+    PU number(10,2) NOT NULL ,
+    total number(10,2) NOT NULL 
 );
 ALTER TABLE detailsfacturemateriel ADD foreign key(idfacturemateriel) references facturemateriel(idfacturemateriel);
 ALTER TABLE detailsfacturemateriel ADD foreign key(idarticle) references article(idarticle);
@@ -250,11 +251,11 @@ ALTER TABLE detailsfacturemateriel ADD foreign key(idarticle) references article
 -- Mode  de paiement deja compris dans la bdd
 
 create table paiement(
-    id VARCHAR2(50) primary key not null,
-    idclient varchar2(100) not null,
-    idfacturemateriel varchar2(100) not null,
-    idmodepaiement varchar(100) not null,
-    datepaiement timestamp default current_timestamp
+    id VARCHAR2(50) PRIMARY KEY NOT NULL ,
+    idclient varchar2(100) NOT NULL ,
+    idfacturemateriel varchar2(100) NOT NULL ,
+    idmodepaiement varchar(100) NOT NULL ,
+    datepaiement timestampDEFAULT  current_timestamp
 );
 
 ALTER TABLE paiement ADD foreign key(idclient) references client(idclient);
@@ -263,7 +264,6 @@ ALTER TABLE paiement ADD foreign key(idmodepaiement) references modepaiement(id)
 
 ALTER TABLE article
 DROP COLUMN description;
-
 
 ALTER TABLE article
 DROP COLUMN modele;
@@ -280,6 +280,51 @@ ADD description NVARCHAR2(1000);
 ALTER TABLE article
 ADD (codearticle varchar2(70));
 
+
+ALTER TABLE materiel
+DROP COLUMN description;
+
+ALTER TABLE materiel
+ADD description NVARCHAR2(1000);
+
+
+
+ALTER TABLE detailscommande
+DROP COLUMN description;
+
+ALTER TABLE detailscommande
+ADD description NVARCHAR2(1000);
+
+
+
+ALTER TABLE detailsdevis
+DROP COLUMN description;
+
+ALTER TABLE detailsdevis
+ADD description NVARCHAR2(1000);
+
+
+
+ALTER TABLE detailboncommande
+DROP COLUMN description;
+
+ALTER TABLE detailboncommande
+ADD description NVARCHAR2(1000);
+
+
+ALTER TABLE detailmouvementphysique
+DROP COLUMN description;
+
+ALTER TABLE detailmouvementphysique
+ADD description NVARCHAR2(1000);
+
+
+
+ALTER TABLE detailmouvementfictif
+DROP COLUMN description;
+
+ALTER TABLE detailmouvementfictif
+ADD description NVARCHAR2(1000);
 
 -- Tables
 
