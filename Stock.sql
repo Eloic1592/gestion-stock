@@ -261,6 +261,25 @@ ALTER TABLE paiement ADD foreign key(idclient) references client(idclient);
 ALTER TABLE paiement ADD foreign key(idfacturemateriel) references facturemateriel(idfacturemateriel);
 ALTER TABLE paiement ADD foreign key(idmodepaiement) references modepaiement(id);
 
+ALTER TABLE article
+DROP COLUMN description;
+
+
+ALTER TABLE article
+DROP COLUMN modele;
+
+ALTER TABLE article
+DROP COLUMN codearticle;
+
+ALTER TABLE article
+ADD modele NVARCHAR2(1000);
+
+ALTER TABLE article
+ADD description NVARCHAR2(1000);
+
+ALTER TABLE article
+ADD (codearticle varchar2(70));
+
 
 -- Tables
 
