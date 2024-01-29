@@ -319,12 +319,18 @@ ALTER TABLE detailmouvementphysique
 ADD description NVARCHAR2(1000);
 
 
+ALTER TABLE detailmouvementphysique
+DROP COLUMN commentaire;
+
+ALTER TABLE detailmouvementphysique
+ADD commentaire NVARCHAR2(1000);
+
 
 ALTER TABLE detailmouvementfictif
-DROP COLUMN description;
+DROP COLUMN commentaire;
 
 ALTER TABLE detailmouvementfictif
-ADD description NVARCHAR2(1000);
+ADD commentaire NVARCHAR2(1000);
 
 -- Tables
 

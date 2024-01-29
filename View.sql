@@ -1,7 +1,11 @@
 -- Vue materiel
+
+DROP VIEW liste_materiel;
 CREATE VIEW liste_materiel AS
 SELECT m.IDMATERIEL,
+        tm.IDTYPEMATERIEL,
        tm.TYPEMATERIEL,
+       cm.IDCATEGORIEMATERIEL,
        cm.CATEGORIEMATERIEL,
        a.MARQUE,
        a.modele,
@@ -183,3 +187,37 @@ FROM DETAILBONCOMMANDE db
          JOIN DETAIL_FACTURE DF ON a.IDARTICLE = DF.IDARTICLE
          JOIN BONCOMMANDE BC ON bc.IDBONCOMMANDE = db.IDBONCOMMANDE;
 
+DROP VIEW mouvement_stock;
+CREATE OR REPLACE VIEW mouvement_stock AS
+SELECT
+    ms.IDMOUVEMENTSTOCK,
+    ms.DATEDEPOT,
+    ms.TYPEMOUVEMENT,
+    n.IDNATUREMOUVEMENT,
+    n.NATUREMOUVEMENT
+
+FROM MOUVEMENTSTOCK ms
+         JOIN NATUREMOUVEMENT n on N.IDNATUREMOUVEMENT = ms.IDNATUREMOUVEMENT;
+
+
+DROP VIEW liste_etudiant;
+CREATE OR REPLACE VIEW liste_etudiant AS
+SELECT
+    e.ID,
+    e.NOM,
+    e.PRENOM,
+    e.MAIL,
+    s.VAL
+FROM ETUDIANT e join SEXE s on e.SEXE=S.ID;
+
+DROP VIEW liste_materiel;
+DROP VIEW mouvement_physique;
+DROP VIEW mouvement_fictif;
+DROP VIEW client_facture;
+DROP VIEW detail_facture;
+DROP VIEW paiement_facture;
+DROP VIEW detail_commande;
+DROP VIEW detail_devis;
+DROP VIEW v_detail_bon;
+DROP VIEW mouvement_stock;
+DROP VIEW liste_etudiant;
