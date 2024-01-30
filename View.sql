@@ -130,24 +130,6 @@ from PAIEMENT p
 select * from paiement_facture;
 
 
--- Commande
-Drop view detail_commande;
-
-Create or replace view detail_commande as
-select dc.IDDETAILSCOMMANDE,
-       c.DATECOMMANDE,
-       a.MARQUE,
-       a.MODELE,
-       dc.IDCOMMANDE,
-       dc.DESCRIPTION,
-       dc.QUANTITE,
-       dc.PU,
-       dc.TOTAL,
-       dc.STATUT
-
-from DETAILSCOMMANDE dc
-         join ARTICLE a on dc.IDARTICLE = a.IDARTICLE
-         join COMMANDE c on dc.IDCOMMANDE = c.IDCOMMANDE;
 
 -- Devis
 
@@ -162,29 +144,10 @@ select dv.IDDETAILDEVIS,
        dv.QUANTITE,
        dv.PU,
        dv.TOTAL
-
 from DETAILDEVIS dv
          join ARTICLE a on dv.IDARTICLE = a.IDARTICLE
          join DEVIS c on dv.IDDEVIS = c.IDDEVIS;
 
--- Detail bon de commande
-drop view v_detail_bon;
-
-CREATE OR REPLACE VIEW v_detail_bon AS
-SELECT
-    db.IDDETAILBONCOMMANDE,
-    db.IDBONCOMMANDE,
-    BC.DATEBONCOMMANDE,
-    a.MARQUE,
-    a.MODELE,
-    db.DESCRIPTION,
-    db.QUANTITE,
-    db.PU,
-    db.TOTAL
-FROM DETAILBONCOMMANDE db
-         JOIN ARTICLE a ON a.IDARTICLE = a.IDARTICLE
-         JOIN DETAIL_FACTURE DF ON a.IDARTICLE = DF.IDARTICLE
-         JOIN BONCOMMANDE BC ON bc.IDBONCOMMANDE = db.IDBONCOMMANDE;
 
 DROP VIEW mouvement_stock;
 CREATE OR REPLACE VIEW mouvement_stock AS
@@ -194,7 +157,6 @@ SELECT
     ms.TYPEMOUVEMENT,
     n.IDNATUREMOUVEMENT,
     n.NATUREMOUVEMENT
-
 FROM MOUVEMENTSTOCK ms
          JOIN NATUREMOUVEMENT n on N.IDNATUREMOUVEMENT = ms.IDNATUREMOUVEMENT;
 
@@ -215,8 +177,67 @@ DROP VIEW mouvement_fictif;
 DROP VIEW client_facture;
 DROP VIEW detail_facture;
 DROP VIEW paiement_facture;
-DROP VIEW detail_commande;
 DROP VIEW detail_devis;
 DROP VIEW v_detail_bon;
 DROP VIEW mouvement_stock;
 DROP VIEW liste_etudiant;
+
+
+drop view client_proforma;
+CREATE OR REPLACE view client_proforma as
+SELECT
+        p.IDPROFORMA,
+        p.IDDEVIS,
+        c.NOM,
+        d.DATEDEVIS,
+        p.DATEVALIDATION
+     FROM PROFORMA P join DEVIS D on p.IDDEVIS=d.IDDEVIS join CLIENT c  on c.IDCLIENT=d.IDCLIENT;
+
+
+drop view detail_proforma;
+CREATE OR REPLACE view detail_proforma as
+SELECT
+        p.IDPROFORMA,
+        p.IDDEVIS,
+        c.NOM,
+        d.DATEDEVIS,
+        p.DATEVALIDATION
+     FROM PROFORMA P join DEVIS D on p.IDDEVIS=d.IDDEVIS join CLIENT c  on c.IDCLIENT=d.IDCLIENT;
+-- Commande
+-- DROP VIEW detail_commande;
+-- Drop view detail_commande;
+
+-- Create or replace view detail_commande as
+-- select dc.IDDETAILSCOMMANDE,
+--        c.DATECOMMANDE,
+--        a.MARQUE,
+--        a.MODELE,
+--        dc.IDCOMMANDE,
+--        dc.DESCRIPTION,
+--        dc.QUANTITE,
+--        dc.PU,
+--        dc.TOTAL,
+--        dc.STATUT
+-- from DETAILSCOMMANDE dc
+--          join ARTICLE a on dc.IDARTICLE = a.IDARTICLE
+--          join COMMANDE c on dc.IDCOMMANDE = c.IDCOMMANDE;
+
+
+-- Detail bon de commande
+-- drop view v_detail_bon;
+
+-- CREATE OR REPLACE VIEW v_detail_bon AS
+-- SELECT
+--     db.IDDETAILBONCOMMANDE,
+--     db.IDBONCOMMANDE,
+--     BC.DATEBONCOMMANDE,
+--     a.MARQUE,
+--     a.MODELE,
+--     db.DESCRIPTION,
+--     db.QUANTITE,
+--     db.PU,
+--     db.TOTAL
+-- FROM DETAILBONCOMMANDE db
+--          JOIN ARTICLE a ON a.IDARTICLE = a.IDARTICLE
+--          JOIN DETAIL_FACTURE DF ON a.IDARTICLE = DF.IDARTICLE
+--          JOIN BONCOMMANDE BC ON bc.IDBONCOMMANDE = db.IDBONCOMMANDE;

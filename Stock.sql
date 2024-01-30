@@ -255,6 +255,14 @@ DROP COLUMN commentaire;
 ALTER TABLE detailmouvementfictif
 ADD commentaire NVARCHAR2(1000);
 
+ALTER TABLE detaildevis
+DROP COLUMN description;
+
+ALTER TABLE detaildevis
+ADD description NVARCHAR2(1000);
+
+
+
 
 -- Create table commande(
 --     idcommande varchar2(50) NOT NULL  PRIMARY KEY,
