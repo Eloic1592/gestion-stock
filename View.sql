@@ -197,12 +197,9 @@ SELECT
 drop view detail_proforma;
 CREATE OR REPLACE view detail_proforma as
 SELECT
-        p.IDPROFORMA,
-        p.IDDEVIS,
-        c.NOM,
-        d.DATEDEVIS,
-        p.DATEVALIDATION
-     FROM PROFORMA P join DEVIS D on p.IDDEVIS=d.IDDEVIS join CLIENT c  on c.IDCLIENT=d.IDCLIENT;
+    p.IDPROFORMA,
+    d.*
+FROM PROFORMA P join DETAIL_DEVIS D on p.IDDEVIS=d.IDDEVIS;
 -- Commande
 -- DROP VIEW detail_commande;
 -- Drop view detail_commande;
