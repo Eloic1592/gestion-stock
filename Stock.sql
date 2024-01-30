@@ -189,21 +189,6 @@ ALTER TABLE facturemateriel ADD foreign key(idclient) references client(idclient
 
 
 
-Create table detailsfacturemateriel(
-    iddetailsfacturemateriel VARCHAR2(50) PRIMARY KEY NOT NULL ,
-    idfacturemateriel VARCHAR2(100) NOT NULL ,
-    idarticle VARCHAR2(100) NOT NULL ,
-    quantite number(10,2) NOT NULL ,
-    PU number(10,2) NOT NULL ,
-    total number(10,2) NOT NULL 
-);
-ALTER TABLE detailsfacturemateriel ADD foreign key(idfacturemateriel) references facturemateriel(idfacturemateriel);
-ALTER TABLE detailsfacturemateriel ADD foreign key(idarticle) references article(idarticle);
-
-
-
--- Mode  de paiement deja compris dans la bdd
-
 create table paiement(
     id VARCHAR2(50) PRIMARY KEY NOT NULL ,
     idclient varchar2(100) NOT NULL ,
@@ -310,6 +295,18 @@ ADD commentaire NVARCHAR2(1000);
 
 -- ALTER TABLE detailboncommande ADD foreign key(idarticle) references article(idarticle);
 -- Alter table detailboncommande add foreign key(idboncommande) references boncommande(idboncommande);
+
+-- Create table detailsfacturemateriel(
+--     iddetailsfacturemateriel VARCHAR2(50) PRIMARY KEY NOT NULL ,
+--     idfacturemateriel VARCHAR2(100) NOT NULL ,
+--     idarticle VARCHAR2(100) NOT NULL ,
+--     quantite number(10,2) NOT NULL ,
+--     PU number(10,2) NOT NULL ,
+--     total number(10,2) NOT NULL 
+-- );
+-- ALTER TABLE detailsfacturemateriel ADD foreign key(idfacturemateriel) references facturemateriel(idfacturemateriel);
+-- ALTER TABLE detailsfacturemateriel ADD foreign key(idarticle) references article(idarticle);
+
 
 
 -- ALTER TABLE detailscommande
