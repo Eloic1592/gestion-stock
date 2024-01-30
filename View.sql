@@ -22,7 +22,7 @@ FROM materiel m
 
 -- Vue mouvement de stock[physique-fictif]
 drop view mouvement_physique;
-Create or replace view mouvement_physique as
+CREATE or replace view mouvement_physique as
 select dmp.IDDETAILMOUVEMENTPHYSIQUE,
        ms.IDMOUVEMENTSTOCK,
        ms.DATEDEPOT,
@@ -42,7 +42,6 @@ select dmp.IDDETAILMOUVEMENTPHYSIQUE,
        dmp.DESCRIPTION,
        dmp.COMMENTAIRE,
        dmp.STATUT
-
 from  DETAILMOUVEMENTPHYSIQUE dmp
           join MOUVEMENTSTOCK ms on ms.IDMOUVEMENTSTOCK = dmp.IDMOUVEMENT
           join ARTICLE A on A.IDARTICLE = dmp.IDARTICLE

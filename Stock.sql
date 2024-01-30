@@ -209,7 +209,7 @@ create table paiement(
     idclient varchar2(100) NOT NULL ,
     idfacturemateriel varchar2(100) NOT NULL ,
     idmodepaiement varchar(100) NOT NULL ,
-    datepaiement timestampDEFAULT  current_timestamp
+    datepaiement timestamp DEFAULT  current_timestamp
 );
 
 ALTER TABLE paiement ADD foreign key(idclient) references client(idclient);
