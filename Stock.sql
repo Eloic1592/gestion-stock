@@ -2,12 +2,9 @@
 CREATE SEQUENCE SEQTYPEMATERIEL START WITH 1 INCREMENT BY 1;
 CREATE SEQUENCE SEQCATEGORIEMATERIEL START WITH 1 INCREMENT BY 1;
 CREATE SEQUENCE SEQARTICLE START WITH 1 INCREMENT BY 1;
-CREATE SEQUENCE SEQCOMMANDE START WITH 1 INCREMENT BY 1;
-CREATE SEQUENCE SEQDETAILSCOMMANDE START WITH 1 INCREMENT BY 1;
 CREATE SEQUENCE SEQDEVIS START WITH 1 INCREMENT BY 1;
 CREATE SEQUENCE SEQDETAILDEVIS START WITH 1 INCREMENT BY 1;
 CREATE SEQUENCE SEQBONCOMMANDE START WITH 1 INCREMENT BY 1;
-CREATE SEQUENCE SEQDETAILBONCOMMANDE START WITH 1 INCREMENT BY 1;
 CREATE SEQUENCE SEQBONLIVRAISON START WITH 1 INCREMENT BY 1;
 CREATE SEQUENCE SEQMATERIEL START WITH 1 INCREMENT BY 1;
 CREATE SEQUENCE SEQDEPOT START WITH 1 INCREMENT BY 1;
@@ -22,8 +19,6 @@ CREATE SEQUENCE SEQPAIEMENT START WITH 1 INCREMENT BY 1;
 
 
 
--- Stock
--- Il y a 19 tables
 
 -- Ordinateur,chargeur,clavier,lampe,...
 Create table typeMateriel(
@@ -46,49 +41,15 @@ Create table article(
     codearticle CLOB
 );
 
-Create table commande(
-    idcommande varchar2(50) NOT NULL  PRIMARY KEY,
-    idclient varchar2(100) NOT NULL , 
-    datecommande timestampDEFAULT  current_timestamp,
-    statut number DEFAULT  0
-);
-
--- Ici idclient= fournisseur
-Alter table commande add foreign key (idclient) references client(idclient);
-
-CREATE TABLE detailscommande(
-   iddetailscommande varchar(50) NOT NULL  PRIMARY KEY,
-   idcommande varchar2(50) NOT NULL ,
-   idarticle varchar2(50) NOT NULL ,
-   description CLOB,
-   quantite number(10,2) NOT NULL ,
-   PU number(10,2)DEFAULT  0 NOT NULL ,
-   total number(12,2),
-   statut number DEFAULT  0
-);
-
-
-
-ALTER TABLE detailscommande ADD foreign key(idcommande) references commande(idcommande);
-ALTER TABLE detailscommande ADD foreign key(idarticle) references article(idarticle);
-
--- commande,encore modifiable
-
 
 Create table devis(
     iddevis VARCHAR2(50) PRIMARY KEY NOT NULL ,
-    idcommande VARCHAR2(50) NOT NULL ,
     idclient varchar2(100) NOT NULL , 
-    datedevis TIMESTAMPDEFAULT  current_timestamp,
+    datedevis TIMESTAMP DEFAULT current_timestamp,
     statut number DEFAULT  0
 );
 
--- Ici idclient= fournisseur
 Alter table devis add foreign key (idclient) references client(idclient);
-
-
--- 1-Devis,encore modifiable 
--- 2- Le proforma doit etre valider par l'utilisateur pour etre transformer en facture definitive
 
 
 Create table detaildevis(
@@ -97,43 +58,36 @@ Create table detaildevis(
     idarticle VARCHAR2(100) NOT NULL ,
     description CLOB,
     quantite number(10,2) NOT NULL ,
-    PU number(10,2)DEFAULT  0 NOT NULL ,
-    total number(10,2)DEFAULT  0 NOT NULL 
+    PU number(10,2) DEFAULT  0 NOT NULL ,
+    total number(10,2) DEFAULT  0 NOT NULL 
 );
 
 ALTER TABLE detaildevis ADD foreign key(iddevis) references devis(iddevis);
 ALTER TABLE detaildevis ADD foreign key(idarticle) references article(idarticle);
 
+Create table proforma(
+    idproforma VARCHAR(50) PRIMARY KEY,
+    iddevis VARCHAR2(50) NOT NULL,
+    datevalidation TIMESTAMP DEFAULT current_timestamp
+);
+ALTER TABLE proforma ADD foreign key(iddevis) references devis(iddevis);
+
 
 Create table boncommande(
     idboncommande varchar2(100) NOT NULL  PRIMARY KEY,
-    idclient varchar2(100) NOT NULL , 
-    dateboncommande TIMESTAMPDEFAULT  current_timestamp,
+    idproforma VARCHAR2(50) NOT NULL,
+    dateboncommande TIMESTAMP DEFAULT  current_timestamp,
     statut number DEFAULT  0
 );
 
-Alter table boncommande add foreign key (idclient) references client(idclient);
-
-
-Create table detailboncommande(
-    iddetailboncommande varchar2(100) NOT NULL  PRIMARY KEY,
-    idboncommande varchar2(100) NOT NULL ,
-    idarticle VARCHAR2(100) NOT NULL ,
-    description clob,
-    quantite number(10,2) NOT NULL ,
-    PU number(10,2) NOT NULL  ,
-    total number(10,2) NOT NULL 
-);
-
-ALTER TABLE detailboncommande ADD foreign key(idarticle) references article(idarticle);
-Alter table detailboncommande add foreign key(idboncommande) references boncommande(idboncommande);
+Alter table boncommande add foreign key (idproforma) references proforma(idproforma);
 
 
 Create table bonlivraison(
     id varchar2(100) NOT NULL  PRIMARY KEY,
     idclient varchar2(100) NOT NULL , 
     idboncommande varchar2(100) NOT NULL ,
-    datebonlivraison TIMESTAMPDEFAULT  current_timestamp,
+    datebonlivraison TIMESTAMP DEFAULT  current_timestamp,
     statut number DEFAULT  0
 );
 Alter table bonlivraison add foreign key (idclient) references client(idclient);
@@ -288,28 +242,12 @@ ALTER TABLE materiel
 ADD description NVARCHAR2(1000);
 
 
-
-ALTER TABLE detailscommande
-DROP COLUMN description;
-
-ALTER TABLE detailscommande
-ADD description NVARCHAR2(1000);
-
-
-
 ALTER TABLE detailsdevis
 DROP COLUMN description;
 
 ALTER TABLE detailsdevis
 ADD description NVARCHAR2(1000);
 
-
-
-ALTER TABLE detailboncommande
-DROP COLUMN description;
-
-ALTER TABLE detailboncommande
-ADD description NVARCHAR2(1000);
 
 
 ALTER TABLE detailmouvementphysique
@@ -332,10 +270,60 @@ DROP COLUMN commentaire;
 ALTER TABLE detailmouvementfictif
 ADD commentaire NVARCHAR2(1000);
 
--- Tables
 
--- Historique
--- Import csv
--- Export csv
--- Statistiques
+-- Create table commande(
+--     idcommande varchar2(50) NOT NULL  PRIMARY KEY,
+--     idclient varchar2(100) NOT NULL , 
+--     datecommande timestampDEFAULT  current_timestamp,
+--     statut number DEFAULT  0
+-- );
 
+-- -- Ici idclient= fournisseur
+-- Alter table commande add foreign key (idclient) references client(idclient);
+
+-- CREATE TABLE detailscommande(
+--    iddetailscommande varchar(50) NOT NULL  PRIMARY KEY,
+--    idcommande varchar2(50) NOT NULL ,
+--    idarticle varchar2(50) NOT NULL ,
+--    description CLOB,
+--    quantite number(10,2) NOT NULL ,
+--    PU number(10,2)DEFAULT  0 NOT NULL ,
+--    total number(12,2),
+--    statut number DEFAULT  0
+-- );
+
+
+
+-- ALTER TABLE detailscommande ADD foreign key(idcommande) references commande(idcommande);
+-- ALTER TABLE detailscommande ADD foreign key(idarticle) references article(idarticle);
+
+-- commande,encore modifiable
+-- Create table detailboncommande(
+--     iddetailboncommande varchar2(100) NOT NULL  PRIMARY KEY,
+--     idboncommande varchar2(100) NOT NULL ,
+--     idarticle VARCHAR2(100) NOT NULL ,
+--     description clob,
+--     quantite number(10,2) NOT NULL ,
+--     PU number(10,2) NOT NULL  ,
+--     total number(10,2) NOT NULL 
+-- );
+
+-- ALTER TABLE detailboncommande ADD foreign key(idarticle) references article(idarticle);
+-- Alter table detailboncommande add foreign key(idboncommande) references boncommande(idboncommande);
+
+
+-- ALTER TABLE detailscommande
+-- DROP COLUMN description;
+
+-- ALTER TABLE detailscommande
+-- ADD description NVARCHAR2(1000);
+
+-- ALTER TABLE detailboncommande
+-- DROP COLUMN description;
+
+-- ALTER TABLE detailboncommande
+-- ADD description NVARCHAR2(1000);
+
+-- CREATE SEQUENCE SEQCOMMANDE START WITH 1 INCREMENT BY 1;
+-- CREATE SEQUENCE SEQDETAILSCOMMANDE START WITH 1 INCREMENT BY 1;
+-- CREATE SEQUENCE SEQDETAILBONCOMMANDE START WITH 1 INCREMENT BY 1;

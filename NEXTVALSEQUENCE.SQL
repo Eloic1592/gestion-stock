@@ -22,21 +22,6 @@ BEGIN
  return retour;
 END;
 
-CREATE OR REPLACE FUNCTION getseqcommande
- RETURN NUMBER IS
- retour NUMBER;
-BEGIN
- SELECT SEQCOMMANDE.nextval INTO retour FROM dual;
- return retour;
-END;
-
-CREATE OR REPLACE FUNCTION getseqdetailscommande
- RETURN NUMBER IS
- retour NUMBER;
-BEGIN
- SELECT SEQDETAILSCOMMANDE.nextval INTO retour FROM dual;
- return retour;
-END;
 
 CREATE OR REPLACE FUNCTION getseqdevis
  RETURN NUMBER IS
@@ -62,13 +47,6 @@ BEGIN
  return retour;
 END;
 
-CREATE OR REPLACE FUNCTION getseqdetailboncommande
- RETURN NUMBER IS
- retour NUMBER;
-BEGIN
- SELECT SEQDETAILBONCOMMANDE.nextval INTO retour FROM dual;
- return retour;
-END;
 
 CREATE OR REPLACE FUNCTION getseqbonlivraison
  RETURN NUMBER IS
@@ -149,3 +127,27 @@ BEGIN
  SELECT SEQPAIEMENT.nextval INTO retour FROM dual;
  return retour;
 END;
+
+-- CREATE OR REPLACE FUNCTION getseqcommande
+--  RETURN NUMBER IS
+--  retour NUMBER;
+-- BEGIN
+--  SELECT SEQCOMMANDE.nextval INTO retour FROM dual;
+--  return retour;
+-- END;
+
+-- CREATE OR REPLACE FUNCTION getseqdetailscommande
+--  RETURN NUMBER IS
+--  retour NUMBER;
+-- BEGIN
+--  SELECT SEQDETAILSCOMMANDE.nextval INTO retour FROM dual;
+--  return retour;
+-- END;
+
+-- CREATE OR REPLACE FUNCTION getseqdetailboncommande
+--  RETURN NUMBER IS
+--  retour NUMBER;
+-- BEGIN
+--  SELECT SEQDETAILBONCOMMANDE.nextval INTO retour FROM dual;
+--  return retour;
+-- END;

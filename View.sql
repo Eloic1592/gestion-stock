@@ -203,11 +203,11 @@ FROM MOUVEMENTSTOCK ms
 DROP VIEW liste_etudiant;
 CREATE OR REPLACE VIEW liste_etudiant AS
 SELECT
-    e.ID,
+    e.ID as IDETUDIANT,
     e.NOM,
     e.PRENOM,
     e.MAIL,
-    s.VAL
+    s.VAL as SEXE
 FROM ETUDIANT e join SEXE s on e.SEXE=S.ID;
 
 DROP VIEW liste_materiel;
