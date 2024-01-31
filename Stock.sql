@@ -233,8 +233,6 @@ DROP COLUMN description;
 ALTER TABLE detailsdevis
 ADD description NVARCHAR2(1000);
 
-
-
 ALTER TABLE detailmouvementphysique
 DROP COLUMN description;
 
@@ -260,6 +258,10 @@ DROP COLUMN description;
 
 ALTER TABLE detaildevis
 ADD description NVARCHAR2(1000);
+
+
+ALTER TABLE devis 
+ADD libelle NVARCHAR2(1000);
 
 
 

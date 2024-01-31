@@ -130,25 +130,6 @@ from PAIEMENT p
 select * from paiement_facture;
 
 
-
--- Devis
-
-Drop view detail_devis;
-
-Create or replace view detail_devis as
-select dv.IDDETAILDEVIS,
-       c.IDDEVIS,
-       a.MARQUE,
-       a.MODELE,
-       dv.DESCRIPTION,
-       dv.QUANTITE,
-       dv.PU,
-       dv.TOTAL
-from DETAILDEVIS dv
-         join ARTICLE a on dv.IDARTICLE = a.IDARTICLE
-         join DEVIS c on dv.IDDEVIS = c.IDDEVIS;
-
-
 DROP VIEW mouvement_stock;
 CREATE OR REPLACE VIEW mouvement_stock AS
 SELECT
@@ -171,27 +152,39 @@ SELECT
     s.VAL as SEXE
 FROM ETUDIANT e join SEXE s on e.SEXE=S.ID;
 
-DROP VIEW liste_materiel;
-DROP VIEW mouvement_physique;
-DROP VIEW mouvement_fictif;
-DROP VIEW client_facture;
-DROP VIEW detail_facture;
-DROP VIEW paiement_facture;
-DROP VIEW detail_devis;
-DROP VIEW v_detail_bon;
-DROP VIEW mouvement_stock;
-DROP VIEW liste_etudiant;
+
+-- Devis
+drop view client_devis;
+CREATE OR REPLACE view client_devis as
+SELECT
+        d.IDDEVIS,
+        c.NOM,
+        d.LIBELLE,
+        d.DATEDEVIS
+     FROM  DEVIS D  join CLIENT c  on c.IDCLIENT=d.IDCLIENT;    
+
+Drop view detail_devis;
+Create or replace view detail_devis as
+select dv.IDDETAILDEVIS,
+       c.IDDEVIS,
+       a.MARQUE,
+       a.MODELE,
+       dv.DESCRIPTION,
+       dv.QUANTITE,
+       dv.PU,
+       dv.TOTAL
+from DETAILDEVIS dv
+         join ARTICLE a on dv.IDARTICLE = a.IDARTICLE
+         join DEVIS c on dv.IDDEVIS = c.IDDEVIS;
+
 
 
 drop view client_proforma;
 CREATE OR REPLACE view client_proforma as
 SELECT
         p.IDPROFORMA,
-        p.IDDEVIS,
-        c.NOM,
-        d.DATEDEVIS,
-        p.DATEVALIDATION
-     FROM PROFORMA P join DEVIS D on p.IDDEVIS=d.IDDEVIS join CLIENT c  on c.IDCLIENT=d.IDCLIENT;
+        d.*
+     FROM PROFORMA P join client_devis D on p.IDDEVIS=d.IDDEVIS;
 
 
 drop view detail_proforma;
@@ -200,6 +193,33 @@ SELECT
     p.IDPROFORMA,
     d.*
 FROM PROFORMA P join DETAIL_DEVIS D on p.IDDEVIS=d.IDDEVIS;
+
+
+DROP VIEW liste_materiel;
+DROP VIEW mouvement_physique;
+DROP VIEW mouvement_fictif;
+DROP VIEW client_facture;
+DROP VIEW detail_facture;
+DROP VIEW paiement_facture;
+DROP VIEW v_detail_bon;
+DROP VIEW mouvement_stock;
+DROP VIEW liste_etudiant;
+drop view client_devis;
+DROP VIEW detail_devis;
+drop view client_proforma;
+drop view detail_proforma;
+
+
+
+
+
+
+
+
+
+
+
+
 -- Commande
 -- DROP VIEW detail_commande;
 -- Drop view detail_commande;
