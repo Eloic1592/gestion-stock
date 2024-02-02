@@ -31,6 +31,15 @@ BEGIN
  return retour;
 END;
 
+
+CREATE OR REPLACE FUNCTION getseqproforma
+ RETURN NUMBER IS
+ retour NUMBER;
+BEGIN
+ SELECT SEQPROFORMA.nextval INTO retour FROM dual;
+ return retour;
+END;
+
 CREATE OR REPLACE FUNCTION getseqdetaildevis
  RETURN NUMBER IS
  retour NUMBER;
