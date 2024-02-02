@@ -183,7 +183,8 @@ drop view client_proforma;
 CREATE OR REPLACE view client_proforma as
 SELECT
         p.IDPROFORMA,
-        d.*
+        d.*,
+        p.datevalidation
      FROM PROFORMA P join client_devis D on p.IDDEVIS=d.IDDEVIS;
 
 
