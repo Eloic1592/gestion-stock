@@ -85,13 +85,11 @@ Alter table boncommande add foreign key (idproforma) references proforma(idprofo
 
 
 Create table bonlivraison(
-    id varchar2(100) NOT NULL  PRIMARY KEY,
-    idclient varchar2(100) NOT NULL , 
+    idbonlivraison varchar2(100) NOT NULL  PRIMARY KEY,
     idboncommande varchar2(100) NOT NULL ,
     datebonlivraison TIMESTAMP DEFAULT  current_timestamp,
     statut number DEFAULT  0
 );
-Alter table bonlivraison add foreign key (idclient) references client(idclient);
 Alter table bonlivraison add foreign key(idboncommande) references boncommande(idboncommande);
 
 

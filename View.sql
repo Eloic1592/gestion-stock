@@ -195,6 +195,29 @@ SELECT
     d.*
 FROM PROFORMA P join DETAIL_DEVIS D on p.IDDEVIS=d.IDDEVIS;
 
+drop view client_commande;
+CREATE OR REPLACE view client_commande as
+SELECT
+        c.IDBONCOMMANDE,
+        c.DATEBONCOMMANDE,
+        CP.NOM,
+        CP.IDPROFORMA,
+        CP.DATEVALIDATION
+FROM BONCOMMANDE C join client_proforma CP on c.IDPROFORMA=CP.IDPROFORMA;
+
+
+drop view client_livraison;
+CREATE OR REPLACE view client_livraison as
+SELECT
+        c.IDBONLIVRAISON,
+        CP.IDBONCOMMANDE,
+        c.DATEBONLIVRAISON,
+        CP.NOM,
+        CP.IDPROFORMA,
+        CP.DATEVALIDATION
+FROM BONLIVRAISON C join client_commande CP on c.IDBONCOMMANDE=CP.IDBONCOMMANDE;
+
+
 
 DROP VIEW liste_materiel;
 DROP VIEW mouvement_physique;
@@ -209,6 +232,7 @@ drop view client_devis;
 DROP VIEW detail_devis;
 drop view client_proforma;
 drop view detail_proforma;
+drop view client_commande;
 
 
 
