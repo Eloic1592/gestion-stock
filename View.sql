@@ -223,6 +223,7 @@ CREATE OR REPLACE view mouvement_stock as
 SELECT
         MS.IDMOUVEMENTSTOCK,
         MS.DATEDEPOT,
+        ms.TYPEMOUVEMENT as TYPE,
        case ms.TYPEMOUVEMENT WHEN 1 THEN
                                  'ENTREE'
                              WHEN -1 THEN
