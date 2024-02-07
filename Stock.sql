@@ -268,7 +268,8 @@ ADD description NVARCHAR2(1000);
 ALTER TABLE devis 
 ADD libelle NVARCHAR2(1000);
 
-
+ALTER TABLE naturemouvement 
+ADD typeMouvement Integer ;
 
 
 -- Create table commande(
