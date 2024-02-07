@@ -21,6 +21,7 @@ FROM materiel m
          JOIN ARTICLE a ON m.IDARTICLE = a.IDARTICLE;
 
 -- Vue mouvement de stock[physique-fictif]
+
 drop view mouvement_physique;
 CREATE or replace view mouvement_physique as
 select dmp.IDDETAILMOUVEMENTPHYSIQUE,
@@ -32,7 +33,6 @@ select dmp.IDDETAILMOUVEMENTPHYSIQUE,
             'SORTIE'
         END as MOUVEMENT,
        nm.NATUREMOUVEMENT,
-        nm.TYPEMOUVEMENT,
        a.MARQUE,
        a.MODELE,
        dmp.QUANTITE,
@@ -60,7 +60,6 @@ select dmf.IDDETAILMOUVEMENTFICTIF,
                                  'SORTIE'
            END as MOUVEMENT,
        nm.NATUREMOUVEMENT,
-        nm.TYPEMOUVEMENT,
        m.MARQUE,
        m.MODELE,
        m.NUMSERIE,
@@ -219,6 +218,21 @@ SELECT
         CP.DATEVALIDATION
 FROM BONLIVRAISON C join client_commande CP on c.IDBONCOMMANDE=CP.IDBONCOMMANDE;
 
+drop view mouvement_stock;
+CREATE OR REPLACE view mouvement_stock as
+SELECT
+        MS.IDMOUVEMENTSTOCK,
+        MS.DATEDEPOT,
+       case ms.TYPEMOUVEMENT WHEN 1 THEN
+                                 'ENTREE'
+                             WHEN -1 THEN
+                                 'SORTIE'
+        END as MOUVEMENT,
+        N.IDNATUREMOUVEMENT,
+        N.NATUREMOUVEMENT,
+        N.TYPEMOUVEMENT,
+        MS.STATUT
+FROM MOUVEMENTSTOCK MS join NATUREMOUVEMENT N on ms.IDNATUREMOUVEMENT=N.IDNATUREMOUVEMENT;
 
 
 DROP VIEW liste_materiel;
