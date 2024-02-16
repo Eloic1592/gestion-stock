@@ -160,6 +160,10 @@ CREATE OR REPLACE view client_devis as
 SELECT
         d.IDDEVIS,
         c.NOM,
+        c.ADRESSE,
+        c.NUMSTAT,
+        c.NIF,
+        c.TELEPHONE,
         d.LIBELLE,
         d.DATEDEVIS
      FROM  DEVIS D  join CLIENT c  on c.IDCLIENT=d.IDCLIENT;    
