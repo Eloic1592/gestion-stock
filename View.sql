@@ -205,8 +205,12 @@ CREATE OR REPLACE view client_commande as
 SELECT
         c.IDBONCOMMANDE,
         c.DATEBONCOMMANDE,
-        CP.NOM,
         CP.IDPROFORMA,
+        CP.NOM,
+        CP.NIF,
+        CP.NUMSTAT,
+        CP.ADRESSE,
+        CP.TELEPHONE,
         CP.DATEVALIDATION
 FROM BONCOMMANDE C join client_proforma CP on c.IDPROFORMA=CP.IDPROFORMA;
 
@@ -215,11 +219,8 @@ drop view client_livraison;
 CREATE OR REPLACE view client_livraison as
 SELECT
         c.IDBONLIVRAISON,
-        CP.IDBONCOMMANDE,
         c.DATEBONLIVRAISON,
-        CP.NOM,
-        CP.IDPROFORMA,
-        CP.DATEVALIDATION
+        CP.*
 FROM BONLIVRAISON C join client_commande CP on c.IDBONCOMMANDE=CP.IDBONCOMMANDE;
 
 drop view mouvement_stock;
