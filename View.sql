@@ -46,7 +46,11 @@ select dmp.IDDETAILMOUVEMENTPHYSIQUE,
        nm.NATUREMOUVEMENT,
        a.MARQUE,
        a.MODELE,
-       dmp.QUANTITE,
+        case ms.TYPEMOUVEMENT WHEN 1 THEN
+            dmp.QUANTITE*1
+           WHEN -1 THEN
+            dmp.QUANTITE*-1
+        END as QUANTITE,
        dmp.PU,
        dmp.PRIXSTOCK,
        dmp.total,
