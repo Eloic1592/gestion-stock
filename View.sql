@@ -1,24 +1,35 @@
 -- Vue materiel
 
 DROP VIEW liste_materiel;
-CREATE VIEW liste_materiel AS
-SELECT m.IDMATERIEL,
-        tm.IDTYPEMATERIEL,
-       tm.TYPEMATERIEL,
-       cm.IDCATEGORIEMATERIEL,
-       cm.CATEGORIEMATERIEL,
-       a.MARQUE,
-       a.modele,
-       m.numserie,
-       m.COULEUR,
-       m.DESCRIPTION,
-       m.PRIXVENTE,
-       m.CAUTION,
-       m.STATUT
-FROM materiel m
-         JOIN TYPEMATERIEL tm ON m.IDTYPEMATERIEL = tm.IDTYPEMATERIEL
-         JOIN CATEGORIEMATERIEL cm ON m.IDCATEGORIEMATERIEL = cm.IDCATEGORIEMATERIEL
-         JOIN ARTICLE a ON m.IDARTICLE = a.IDARTICLE;
+CREATE or REPLACE VIEW liste_materiel AS
+SELECT 
+    m.IDMATERIEL,
+    tm.IDTYPEMATERIEL,
+    tm.TYPEMATERIEL,
+    cm.IDCATEGORIEMATERIEL,
+    cm.CATEGORIEMATERIEL,
+    a.MARQUE,
+    a.modele,
+    m.numserie,
+    m.COULEUR,
+    CASE 
+        WHEN m.DESCRIPTION IS NULL OR m.DESCRIPTION = '' THEN N'Aucune description'
+        ELSE m.DESCRIPTION
+    END AS DESCRIPTION,
+    m.PRIXVENTE,
+    m.CAUTION,
+    m.STATUT
+FROM 
+    materiel m
+JOIN 
+    TYPEMATERIEL tm ON m.IDTYPEMATERIEL = tm.IDTYPEMATERIEL
+JOIN 
+    CATEGORIEMATERIEL cm ON m.IDCATEGORIEMATERIEL = cm.IDCATEGORIEMATERIEL
+JOIN 
+    ARTICLE a ON m.IDARTICLE = a.IDARTICLE;
+
+
+
 
 -- Vue mouvement de stock[physique-fictif]
 
