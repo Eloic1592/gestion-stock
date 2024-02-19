@@ -181,7 +181,7 @@ SELECT
         c.TELEPHONE,
         d.LIBELLE,
         d.DATEDEVIS
-     FROM  DEVIS D  join CLIENT c  on c.IDCLIENT=d.IDCLIENT;    
+     FROM  DEVIS D  join CLIENT c  on c.IDCLIENT=d.IDCLIENT LEFT OUTER JOIN  proforma p on d.iddevis=p.iddevis WHERE  p.IDDEVIS IS NULL;    
 
 Drop view detail_devis;
 Create or replace view detail_devis as
@@ -203,9 +203,15 @@ drop view client_proforma;
 CREATE OR REPLACE view client_proforma as
 SELECT
         p.IDPROFORMA,
-        d.*,
+        d.IDDEVIS,
+        c.NOM,
+        c.ADRESSE,
+        c.NUMSTAT,
+        c.NIF,
+        c.TELEPHONE,
+        d.LIBELLE,
         p.datevalidation
-     FROM PROFORMA P join client_devis D on p.IDDEVIS=d.IDDEVIS;
+     FROM PROFORMA P join devis D on p.IDDEVIS=d.IDDEVIS join CLIENT c  on c.IDCLIENT=d.IDCLIENT left outer join BONCOMMANDE b on  b.IDPROFORMA=P.IDPROFORMA WHERE  b.IDPROFORMA IS NULL;
 
 
 drop view detail_proforma;
@@ -218,16 +224,16 @@ FROM PROFORMA P join DETAIL_DEVIS D on p.IDDEVIS=d.IDDEVIS;
 drop view client_commande;
 CREATE OR REPLACE view client_commande as
 SELECT
-        c.IDBONCOMMANDE,
-        c.DATEBONCOMMANDE,
+        b.IDBONCOMMANDE,
+        b.DATEBONCOMMANDE,
         CP.IDPROFORMA,
-        CP.NOM,
-        CP.NIF,
-        CP.NUMSTAT,
-        CP.ADRESSE,
-        CP.TELEPHONE,
+        C.NOM,
+        C.NIF,
+        C.NUMSTAT,
+        C.ADRESSE,
+        C.TELEPHONE,
         CP.DATEVALIDATION
-FROM BONCOMMANDE C join client_proforma CP on c.IDPROFORMA=CP.IDPROFORMA;
+FROM BONCOMMANDE B left OUTER join PROFORMA CP on b.IDPROFORMA=CP.IDPROFORMA join PROFORMA P on  b.IDPROFORMA=CP.IDPROFORMA join devis D on p.IDDEVIS=d.IDDEVIS join CLIENT c  on c.IDCLIENT=d.IDCLIENT left outer join BONLIVRAISON l on b.IDBONCOMMANDE=l.IDBONCOMMANDE WHERE  l.IDBONCOMMANDE IS NULL;
 
 
 drop view client_livraison;
