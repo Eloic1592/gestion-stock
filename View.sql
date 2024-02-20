@@ -55,7 +55,10 @@ select dmp.IDDETAILMOUVEMENTPHYSIQUE,
        dmp.PRIXSTOCK,
        dmp.total,
        d.DEPOT,
-       dmp.DESCRIPTION,
+        CASE 
+        WHEN dmp.DESCRIPTION IS NULL OR dmp.DESCRIPTION = '' THEN N'Aucune description'
+        ELSE dmp.DESCRIPTION
+        END AS DESCRIPTION,
        dmp.COMMENTAIRE,
        dmp.STATUT
 from  DETAILMOUVEMENTPHYSIQUE dmp
@@ -86,7 +89,10 @@ select dmf.IDDETAILMOUVEMENTFICTIF,
        e.NOM,
        e.PRENOM,
        dmf.COMMENTAIRE,
-       dmf.DESCRIPTION,
+        CASE 
+        WHEN dmf.DESCRIPTION IS NULL OR dmf.DESCRIPTION = '' THEN N'Aucune description'
+        ELSE dmf.DESCRIPTION
+        END AS DESCRIPTION,
        dmf.STATUT
 from  DETAILMOUVEMENTFICTIF dmf
           join MOUVEMENTSTOCK ms on ms.IDMOUVEMENTSTOCK = dmf.IDMOUVEMENT
@@ -189,7 +195,10 @@ select dv.IDDETAILDEVIS,
        c.IDDEVIS,
        a.MARQUE,
        a.MODELE,
-       dv.DESCRIPTION,
+        CASE 
+        WHEN dv.DESCRIPTION IS NULL OR dv.DESCRIPTION = '' THEN N'Aucune description'
+        ELSE dv.DESCRIPTION
+        END AS DESCRIPTION,
        dv.QUANTITE,
        dv.PU,
        dv.TOTAL
@@ -239,10 +248,17 @@ FROM BONCOMMANDE B join PROFORMA CP on b.IDPROFORMA=CP.IDPROFORMA  join devis D 
 drop view client_livraison;
 CREATE OR REPLACE view client_livraison as
 SELECT
-        c.IDBONLIVRAISON,
-        c.DATEBONLIVRAISON,
-        CP.*
-FROM BONLIVRAISON C join client_commande CP on c.IDBONCOMMANDE=CP.IDBONCOMMANDE;
+        l.IDBONLIVRAISON,
+        l.DATEBONLIVRAISON,
+        b.IDBONCOMMANDE,
+        CP.IDPROFORMA,
+        C.NOM,
+        C.NIF,
+        C.NUMSTAT,
+        C.ADRESSE,
+        C.TELEPHONE,
+        CP.DATEVALIDATION
+FROM BONLIVRAISON L join BONCOMMANDE B on b.IDBONCOMMANDE=l.IDBONCOMMANDE  join PROFORMA CP on b.IDPROFORMA=CP.IDPROFORMA  join devis D on CP.IDDEVIS=d.IDDEVIS join CLIENT c  on c.IDCLIENT=d.IDCLIENT;
 
 drop view mouvement_stock;
 CREATE OR REPLACE view mouvement_stock as
