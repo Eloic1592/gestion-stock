@@ -1,16 +1,31 @@
 -- Vue materiel
 
+
+CREATE or REPLACE VIEW liste_article AS
+SELECT 
+    m.IDARTICLE,
+    tm.TYPEMATERIEL,
+    m.MARQUE,
+    m.MODELE,
+    CASE 
+        WHEN m.DESCRIPTION IS NULL OR m.DESCRIPTION = '' THEN N'Aucune description'
+        ELSE m.DESCRIPTION
+    END AS DESCRIPTION
+FROM 
+    ARTICLE m
+JOIN 
+    TYPEMATERIEL tm ON m.IDTYPEMATERIEL = tm.IDTYPEMATERIEL;
+
+
+
 DROP VIEW liste_materiel;
 CREATE or REPLACE VIEW liste_materiel AS
 SELECT 
     m.IDMATERIEL,
-    tm.IDTYPEMATERIEL,
     tm.TYPEMATERIEL,
-    cm.IDCATEGORIEMATERIEL,
-    cm.CATEGORIEMATERIEL,
-    a.MARQUE,
-    a.modele,
-    m.numserie,
+    m.MARQUE,
+    m.MODELE,
+    m.NUMSERIE,
     m.COULEUR,
     CASE 
         WHEN m.DESCRIPTION IS NULL OR m.DESCRIPTION = '' THEN N'Aucune description'
@@ -18,15 +33,12 @@ SELECT
     END AS DESCRIPTION,
     m.PRIXVENTE,
     m.CAUTION,
+    m.SIGNATURE,
     m.STATUT
 FROM 
     materiel m
 JOIN 
-    TYPEMATERIEL tm ON m.IDTYPEMATERIEL = tm.IDTYPEMATERIEL
-JOIN 
-    CATEGORIEMATERIEL cm ON m.IDCATEGORIEMATERIEL = cm.IDCATEGORIEMATERIEL
-JOIN 
-    ARTICLE a ON m.IDARTICLE = a.IDARTICLE;
+    TYPEMATERIEL tm ON m.IDTYPEMATERIEL = tm.IDTYPEMATERIEL;
 
 
 
@@ -152,16 +164,20 @@ from PAIEMENT p
 select * from paiement_facture;
 
 
-DROP VIEW mouvement_stock;
-CREATE OR REPLACE VIEW mouvement_stock AS
+CREATE OR REPLACE view mouvement_stock as
 SELECT
-    ms.IDMOUVEMENTSTOCK,
-    ms.DATEDEPOT,
-    ms.TYPEMOUVEMENT,
-    n.IDNATUREMOUVEMENT,
-    n.NATUREMOUVEMENT
-FROM MOUVEMENTSTOCK ms
-         JOIN NATUREMOUVEMENT n on N.IDNATUREMOUVEMENT = ms.IDNATUREMOUVEMENT;
+        MS.IDMOUVEMENTSTOCK,
+        MS.DATEDEPOT,
+        ms.TYPEMOUVEMENT as TYPE,
+       case ms.TYPEMOUVEMENT WHEN 1 THEN
+                                 'ENTREE'
+                             WHEN -1 THEN
+                                 'SORTIE'
+        END as MOUVEMENT,
+        N.IDNATUREMOUVEMENT,
+        N.NATUREMOUVEMENT,
+        MS.STATUT
+FROM MOUVEMENTSTOCK MS join NATUREMOUVEMENT N on ms.IDNATUREMOUVEMENT=N.IDNATUREMOUVEMENT;
 
 
 DROP VIEW liste_etudiant;
@@ -260,22 +276,7 @@ SELECT
         CP.DATEVALIDATION
 FROM BONLIVRAISON L join BONCOMMANDE B on b.IDBONCOMMANDE=l.IDBONCOMMANDE  join PROFORMA CP on b.IDPROFORMA=CP.IDPROFORMA  join devis D on CP.IDDEVIS=d.IDDEVIS join CLIENT c  on c.IDCLIENT=d.IDCLIENT;
 
-drop view mouvement_stock;
-CREATE OR REPLACE view mouvement_stock as
-SELECT
-        MS.IDMOUVEMENTSTOCK,
-        MS.DATEDEPOT,
-        ms.TYPEMOUVEMENT as TYPE,
-       case ms.TYPEMOUVEMENT WHEN 1 THEN
-                                 'ENTREE'
-                             WHEN -1 THEN
-                                 'SORTIE'
-        END as MOUVEMENT,
-        N.IDNATUREMOUVEMENT,
-        N.NATUREMOUVEMENT,
-        N.TYPEMOUVEMENT,
-        MS.STATUT
-FROM MOUVEMENTSTOCK MS join NATUREMOUVEMENT N on ms.IDNATUREMOUVEMENT=N.IDNATUREMOUVEMENT;
+
 
 
 DROP VIEW liste_materiel;
