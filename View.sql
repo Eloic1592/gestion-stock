@@ -1,6 +1,6 @@
 -- Vue materiel
 
-
+drop view liste_article;
 CREATE or REPLACE VIEW liste_article AS
 SELECT 
     m.IDARTICLE,
@@ -16,6 +16,17 @@ FROM
 JOIN 
     TYPEMATERIEL tm ON m.IDTYPEMATERIEL = tm.IDTYPEMATERIEL;
 
+drop view liste_typemateriel;
+CREATE or REPLACE VIEW liste_typemateriel AS
+SELECT 
+    t.IDTYPEMATERIEL,
+    t.TYPEMATERIEL,
+    c.IDCATEGORIEMATERIEL,
+    c.CATEGORIEMATERIEL
+FROM 
+    TYPEMATERIEL T
+JOIN 
+    CATEGORIEMATERIEL C ON T.IDCATEGORIEMATERIEL = C.IDCATEGORIEMATERIEL;
 
 
 DROP VIEW liste_materiel;
