@@ -4,6 +4,7 @@ drop view liste_article;
 CREATE or REPLACE VIEW liste_article AS
 SELECT 
     m.IDARTICLE,
+    tm.IDTYPEMATERIEL,
     tm.TYPEMATERIEL,
     m.MARQUE,
     m.MODELE,
