@@ -278,7 +278,7 @@ FROM BONLIVRAISON L join BONCOMMANDE B on b.IDBONCOMMANDE=l.IDBONCOMMANDE  join 
 
 
 
-
+DROP VIEW liste_article;
 DROP VIEW liste_materiel;
 DROP VIEW mouvement_physique;
 DROP VIEW mouvement_fictif;
@@ -294,52 +294,3 @@ drop view client_proforma;
 drop view detail_proforma;
 drop view client_commande;
 
-
-
-
-
-
-
-
-
-
-
-
--- Commande
--- DROP VIEW detail_commande;
--- Drop view detail_commande;
-
--- Create or replace view detail_commande as
--- select dc.IDDETAILSCOMMANDE,
---        c.DATECOMMANDE,
---        a.MARQUE,
---        a.MODELE,
---        dc.IDCOMMANDE,
---        dc.DESCRIPTION,
---        dc.QUANTITE,
---        dc.PU,
---        dc.TOTAL,
---        dc.STATUT
--- from DETAILSCOMMANDE dc
---          join ARTICLE a on dc.IDARTICLE = a.IDARTICLE
---          join COMMANDE c on dc.IDCOMMANDE = c.IDCOMMANDE;
-
-
--- Detail bon de commande
--- drop view v_detail_bon;
-
--- CREATE OR REPLACE VIEW v_detail_bon AS
--- SELECT
---     db.IDDETAILBONCOMMANDE,
---     db.IDBONCOMMANDE,
---     BC.DATEBONCOMMANDE,
---     a.MARQUE,
---     a.MODELE,
---     db.DESCRIPTION,
---     db.QUANTITE,
---     db.PU,
---     db.TOTAL
--- FROM DETAILBONCOMMANDE db
---          JOIN ARTICLE a ON a.IDARTICLE = a.IDARTICLE
---          JOIN DETAIL_FACTURE DF ON a.IDARTICLE = DF.IDARTICLE
---          JOIN BONCOMMANDE BC ON bc.IDBONCOMMANDE = db.IDBONCOMMANDE;
