@@ -34,6 +34,7 @@ DROP VIEW liste_materiel;
 CREATE or REPLACE VIEW liste_materiel AS
 SELECT 
     m.IDMATERIEL,
+    tm.IDTYPEMATERIEL,
     tm.TYPEMATERIEL,
     m.MARQUE,
     m.MODELE,
