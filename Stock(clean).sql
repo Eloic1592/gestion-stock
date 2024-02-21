@@ -45,16 +45,20 @@ CREATE TABLE article(
 ALTER TABLE article ADD FOREIGN KEY (idtypeMateriel) REFERENCES typeMateriel(idtypeMateriel);
 
 CREATE TABLE materiel(
-    idmateriel VARCHAR2(50) PRIMARY KEY NOT NULL ,
+    idmateriel VARCHAR2(50) PRIMARY KEY NOT NULL,
     marque NVARCHAR2(100),
     modele NVARCHAR2(1000),
-    numSerie VARCHAR2(100) NOT NULL ,
+    numSerie VARCHAR2(100) NOT NULL,
     description NVARCHAR2(1000),
-    prixVente number(10,2) NOT NULL ,
-    caution number(10,2) NOT NULL ,
-    couleur VARCHAR2(100) NOT NULL ,
-    statut number DEFAULT 0
+    prixVente NUMBER(10,2) NOT NULL,
+    caution NUMBER(10,2) NOT NULL,
+    couleur VARCHAR2(100) NOT NULL,
+    idtypeMateriel VARCHAR2(100) NOT NULL,
+    statut NUMBER DEFAULT 0,
+    signature VARCHAR2(10) CHECK (signature IN ('Perso', 'ITU','Aucun appartenance'))
 );
+ALTER TABLE materiel ADD FOREIGN KEY (idtypeMateriel) REFERENCES typeMateriel(idtypeMateriel);
+
 
 
 CREATE TABLE devis(
@@ -90,7 +94,7 @@ CREATE TABLE proforma(
 
 
 CREATE TABLE boncommande(
-    idboncommande VARCHAR2(100) NOT NULL  PRIMARY KEY,
+    idboncommande VARCHAR2(100) NOT NULL PRIMARY KEY,
     idproforma VARCHAR2(50) NOT NULL,
     dateboncommande TIMESTAMP DEFAULT  current_timestamp,
     statut number DEFAULT  0
