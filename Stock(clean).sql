@@ -221,3 +221,7 @@ DROP TABLE devis;
 DROP TABLE article;
 DROP TABLE typeMateriel;
 DROP TABLE categorieMateriel;
+
+-- Alter
+ALTER TABLE naturemouvement 
+ADD typeMouvement Integer ;
