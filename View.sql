@@ -78,7 +78,8 @@ select dmp.IDDETAILMOUVEMENTPHYSIQUE,
         END as QUANTITE,
        dmp.PU,
        dmp.PRIXSTOCK,
-       dmp.total,
+       dmp.TOTAL,
+       dmp.RESTESTOCK,
        d.DEPOT,
         CASE 
         WHEN dmp.DESCRIPTION IS NULL OR dmp.DESCRIPTION = '' THEN N'Aucune description'
