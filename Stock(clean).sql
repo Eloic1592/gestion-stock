@@ -138,11 +138,12 @@ ALTER TABLE mouvementStock ADD FOREIGN KEY(idnatureMouvement) REFERENCES natureM
 -- ENTREE SORTIE PHYSIQUE
 CREATE TABLE detailmouvementphysique(
    iddetailmouvementphysique VARCHAR2(50) PRIMARY KEY NOT NULL,
-   idmouvement VARCHAR2(50) NOT NULL,
+    typeMouvement number NOT NULL , /*ENTREE OU SORTIE (1,-1)*/
+    idnatureMouvement VARCHAR2(50) NOT NULL ,
+   datedepot TIMESTAMP DEFAULT current_timestamp,
    idarticle VARCHAR2(50) NOT NULL,
    quantite NUMBER(10,2)  DEFAULT 0,
    PU NUMBER(10,2)  DEFAULT 0,
-   prixStock NUMBER(10,2) DEFAULT 0,
    total NUMBER(10,2)  DEFAULT 0,
    restestock NUMBER(10,2) DEFAULT 0,
    iddepot VARCHAR2(50) NOT NULL,
@@ -152,10 +153,11 @@ CREATE TABLE detailmouvementphysique(
 );
 
 
-
-ALTER TABLE detailmouvementphysique ADD FOREIGN KEY(idmouvement) REFERENCES mouvementStock(idmouvementStock);
 ALTER TABLE detailmouvementphysique ADD FOREIGN KEY(idarticle) REFERENCES article(idarticle);
 ALTER TABLE detailmouvementphysique ADD FOREIGN KEY(iddepot) REFERENCES depot(iddepot);
+ALTER TABLE detailmouvementphysique ADD FOREIGN KEY(idnatureMouvement) REFERENCES natureMouvement(idnatureMouvement);
+
+
 
 
 -- ENTREE SORTIE FICTIF

@@ -61,9 +61,8 @@ JOIN
 drop view mouvement_physique;
 CREATE or replace view mouvement_physique as
 select dmp.IDDETAILMOUVEMENTPHYSIQUE,
-       ms.IDMOUVEMENTSTOCK,
-       ms.DATEDEPOT,
-       case ms.TYPEMOUVEMENT WHEN 1 THEN
+       dmp.DATEDEPOT,
+       case dmp.TYPEMOUVEMENT WHEN 1 THEN
            'ENTREE'
            WHEN -1 THEN
             'SORTIE'
@@ -71,13 +70,12 @@ select dmp.IDDETAILMOUVEMENTPHYSIQUE,
        nm.NATUREMOUVEMENT,
        a.MARQUE,
        a.MODELE,
-        case ms.TYPEMOUVEMENT WHEN 1 THEN
+        case dmp.TYPEMOUVEMENT WHEN 1 THEN
             dmp.QUANTITE*1
            WHEN -1 THEN
             dmp.QUANTITE*-1
         END as QUANTITE,
        dmp.PU,
-       dmp.PRIXSTOCK,
        dmp.TOTAL,
        dmp.RESTESTOCK,
        d.DEPOT,
@@ -88,10 +86,9 @@ select dmp.IDDETAILMOUVEMENTPHYSIQUE,
        dmp.COMMENTAIRE,
        dmp.STATUT
 from  DETAILMOUVEMENTPHYSIQUE dmp
-          join MOUVEMENTSTOCK ms on ms.IDMOUVEMENTSTOCK = dmp.IDMOUVEMENT
           join ARTICLE A on A.IDARTICLE = dmp.IDARTICLE
           join DEPOT d on dmp.IDDEPOT = d.IDDEPOT
-          join NATUREMOUVEMENT nm on ms.IDNATUREMOUVEMENT = nm.IDNATUREMOUVEMENT;
+          join NATUREMOUVEMENT nm on dmp.IDNATUREMOUVEMENT = nm.IDNATUREMOUVEMENT;
 
 drop view mouvement_fictif;
 Create or replace view mouvement_fictif as
