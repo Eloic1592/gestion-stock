@@ -40,7 +40,10 @@ SELECT
     tm.IDTYPEMATERIEL,
     tm.TYPEMATERIEL,
     m.MARQUE,
-    m.MODELE,
+        CASE 
+        WHEN m.MODELE IS NULL OR m.MODELE = '' THEN N'Aucune description'
+        ELSE m.MODELE
+    END AS MODELE,
     m.NUMSERIE,
     m.COULEUR,
     CASE 
@@ -72,6 +75,7 @@ select dmp.IDDETAILMOUVEMENTPHYSIQUE,
             'SORTIE'
         END as MOUVEMENT,
        nm.NATUREMOUVEMENT,
+       a.IDARTICLE,
        a.MARQUE,
        a.MODELE,
         case dmp.TYPEMOUVEMENT WHEN 1 THEN
@@ -82,6 +86,7 @@ select dmp.IDDETAILMOUVEMENTPHYSIQUE,
        dmp.PU,
        dmp.TOTAL,
        dmp.RESTESTOCK,
+       d.IDDEPOT,
        d.DEPOT,
         CASE 
         WHEN dmp.DESCRIPTION IS NULL OR dmp.DESCRIPTION = '' THEN N'Aucune description'
@@ -90,7 +95,7 @@ select dmp.IDDETAILMOUVEMENTPHYSIQUE,
        dmp.COMMENTAIRE,
        dmp.STATUT
 from  DETAILMOUVEMENTPHYSIQUE dmp
-          join ARTICLE A on A.IDARTICLE = dmp.IDARTICLE
+          join liste_article A on A.IDARTICLE = dmp.IDARTICLE
           join DEPOT d on dmp.IDDEPOT = d.IDDEPOT
           join NATUREMOUVEMENT nm on dmp.IDNATUREMOUVEMENT = nm.IDNATUREMOUVEMENT;
 
