@@ -292,20 +292,21 @@ SELECT
         CP.DATEVALIDATION
 FROM BONLIVRAISON L join BONCOMMANDE B on b.IDBONCOMMANDE=l.IDBONCOMMANDE  join PROFORMA CP on b.IDPROFORMA=CP.IDPROFORMA  join devis D on CP.IDDEVIS=d.IDDEVIS join CLIENT c  on c.IDCLIENT=d.IDCLIENT;
 
-
 DROP VIEW liste_article;
+DROP VIEW liste_typemateriel;
 DROP VIEW liste_materiel;
 DROP VIEW mouvement_physique;
 DROP VIEW mouvement_fictif;
 DROP VIEW client_facture;
 DROP VIEW detail_facture;
 DROP VIEW paiement_facture;
-DROP VIEW v_detail_bon;
 DROP VIEW mouvement_stock;
 DROP VIEW liste_etudiant;
-drop view client_devis;
+DROP VIEW client_devis;
 DROP VIEW detail_devis;
-drop view client_proforma;
-drop view detail_proforma;
-drop view client_commande;
+DROP VIEW client_proforma;
+DROP VIEW detail_proforma;
+DROP VIEW client_commande;
+DROP VIEW client_livraison;
+
 
