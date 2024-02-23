@@ -62,6 +62,7 @@ drop view mouvement_physique;
 CREATE or replace view mouvement_physique as
 select dmp.IDDETAILMOUVEMENTPHYSIQUE,
        dmp.DATEDEPOT,
+       dmp.TYPEMOUVEMENT,
        case dmp.TYPEMOUVEMENT WHEN 1 THEN
            'ENTREE'
            WHEN -1 THEN
