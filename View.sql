@@ -7,7 +7,10 @@ SELECT
     tm.IDTYPEMATERIEL,
     tm.TYPEMATERIEL,
     m.MARQUE,
-    m.MODELE,
+        CASE 
+        WHEN m.MODELE IS NULL OR m.MODELE = '' THEN N'Aucune description'
+        ELSE m.MODELE
+    END AS MODELE,
     CASE 
         WHEN m.DESCRIPTION IS NULL OR m.DESCRIPTION = '' THEN N'Aucune description'
         ELSE m.DESCRIPTION
