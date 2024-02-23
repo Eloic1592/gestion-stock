@@ -225,3 +225,52 @@ DROP TABLE categorieMateriel;
 -- Alter
 ALTER TABLE naturemouvement 
 ADD typeMouvement Integer ;
+
+
+-- Supprimer les données de la table paiement
+DELETE FROM paiement;
+
+-- Supprimer les données de la table facturemateriel
+DELETE FROM facturemateriel;
+
+-- Supprimer les données de la table detailmouvementfictif
+DELETE FROM detailmouvementfictif;
+
+-- Supprimer les données de la table detailmouvementphysique
+DELETE FROM detailmouvementphysique;
+
+-- Supprimer les données de la table mouvementStock
+DELETE FROM mouvementStock;
+
+-- Supprimer les données de la table natureMouvement
+DELETE FROM natureMouvement;
+
+-- Supprimer les données de la table depot
+DELETE FROM depot;
+
+-- Supprimer les données de la table bonlivraison
+DELETE FROM bonlivraison;
+
+-- Supprimer les données de la table boncommande
+DELETE FROM boncommande;
+
+-- Supprimer les données de la table proforma
+DELETE FROM proforma;
+
+-- Supprimer les données de la table detaildevis
+DELETE FROM detaildevis;
+
+-- Supprimer les données de la table devis
+DELETE FROM devis;
+
+-- Supprimer les données de la table materiel
+DELETE FROM materiel;
+
+-- Supprimer les données de la table article
+DELETE FROM article;
+
+-- Supprimer les données de la table typeMateriel
+DELETE FROM typeMateriel;
+
+-- Supprimer les données de la table categorieMateriel
+DELETE FROM categorieMateriel;
