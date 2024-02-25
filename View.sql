@@ -298,6 +298,13 @@ SELECT
         CP.DATEVALIDATION
 FROM BONLIVRAISON L join BONCOMMANDE B on b.IDBONCOMMANDE=l.IDBONCOMMANDE  join PROFORMA CP on b.IDPROFORMA=CP.IDPROFORMA  join devis D on CP.IDDEVIS=d.IDDEVIS join CLIENT c  on c.IDCLIENT=d.IDCLIENT;
 
+
+CREATE OR REPLACE VIEW stock_article as 
+select coalesce(sum(quantite),0) as quantite,dm.idarticle,la.marque,la.modele,la.description 
+from detailmouvementphysique dm  right join liste_article la on la.idarticle=dm.idarticle group by dm.idarticle,la.marque,la.modele,la.description;
+
+
+
 DROP VIEW liste_article;
 DROP VIEW liste_typemateriel;
 DROP VIEW liste_materiel;
