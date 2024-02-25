@@ -111,7 +111,7 @@ SELECT
         N.IDNATUREMOUVEMENT,
         N.NATUREMOUVEMENT,
         N.TYPEMOUVEMENT,
-        E.ID,
+        E.ID as IDETUDIANT,
         E.NOM,
         E.PRENOM,
         MS.STATUT
