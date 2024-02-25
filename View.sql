@@ -60,10 +60,6 @@ JOIN
     TYPEMATERIEL tm ON m.IDTYPEMATERIEL = tm.IDTYPEMATERIEL;
 
 
-
-
--- Vue mouvement de stock[physique-fictif]
-
 drop view mouvement_physique;
 CREATE or replace view mouvement_physique as
 select dmp.IDDETAILMOUVEMENTPHYSIQUE,
@@ -99,6 +95,40 @@ from  DETAILMOUVEMENTPHYSIQUE dmp
           join DEPOT d on dmp.IDDEPOT = d.IDDEPOT
           join NATUREMOUVEMENT nm on dmp.IDNATUREMOUVEMENT = nm.IDNATUREMOUVEMENT;
 
+
+
+
+CREATE OR REPLACE view mouvement_stock as
+SELECT
+        MS.IDMOUVEMENTSTOCK,
+        MS.DATEDEPOT,
+        ms.TYPEMOUVEMENT as TYPE,
+       case ms.TYPEMOUVEMENT WHEN 1 THEN
+                                 'ENTREE'
+                             WHEN -1 THEN
+                                 'SORTIE'
+        END as MOUVEMENT,
+        N.IDNATUREMOUVEMENT,
+        N.NATUREMOUVEMENT,
+        N.TYPEMOUVEMENT,
+        E.ID,
+        E.NOM,
+        E.PRENOM,
+        MS.STATUT
+FROM MOUVEMENTSTOCK MS join NATUREMOUVEMENT N on ms.IDNATUREMOUVEMENT=N.IDNATUREMOUVEMENT join ETUDIANT E on E.ID=MS.IDETUDIANT;
+
+
+DROP VIEW liste_etudiant;
+CREATE OR REPLACE VIEW liste_etudiant AS
+SELECT
+    e.ID as IDETUDIANT,
+    e.NOM,
+    e.PRENOM,
+    e.MAIL,
+    s.VAL as SEXE
+FROM ETUDIANT e join SEXE s on e.SEXE=S.ID;
+
+
 drop view mouvement_fictif;
 Create or replace view mouvement_fictif as
 select dmf.IDDETAILMOUVEMENTFICTIF,
@@ -118,9 +148,6 @@ select dmf.IDDETAILMOUVEMENTFICTIF,
        m.CAUTION,
        dmf.DATEDEB,
        dmf.DATEFIN,
-       e.ID as IDETUDIANT,
-       e.NOM,
-       e.PRENOM,
        dmf.COMMENTAIRE,
         CASE 
         WHEN dmf.DESCRIPTION IS NULL OR dmf.DESCRIPTION = '' THEN N'Aucune description'
@@ -131,8 +158,8 @@ from  DETAILMOUVEMENTFICTIF dmf
           join MOUVEMENTSTOCK ms on ms.IDMOUVEMENTSTOCK = dmf.IDMOUVEMENT
           join LISTE_MATERIEL m on m.IDMATERIEL = dmf.IDMATERIEL
           join DEPOT d on dmf.IDDEPOT = d.IDDEPOT
-          join NATUREMOUVEMENT nm on ms.IDNATUREMOUVEMENT = nm.IDNATUREMOUVEMENT
-          join ETUDIANT E ON E.ID=dmf.IDETUDIANT;
+          join NATUREMOUVEMENT nm on ms.IDNATUREMOUVEMENT = nm.IDNATUREMOUVEMENT;
+
 
 -- Facture
 drop view client_facture;
@@ -184,33 +211,6 @@ from PAIEMENT p
 
 select * from paiement_facture;
 
-
-CREATE OR REPLACE view mouvement_stock as
-SELECT
-        MS.IDMOUVEMENTSTOCK,
-        MS.DATEDEPOT,
-        ms.TYPEMOUVEMENT as TYPE,
-       case ms.TYPEMOUVEMENT WHEN 1 THEN
-                                 'ENTREE'
-                             WHEN -1 THEN
-                                 'SORTIE'
-        END as MOUVEMENT,
-        N.IDNATUREMOUVEMENT,
-        N.NATUREMOUVEMENT,
-        N.TYPEMOUVEMENT,
-        MS.STATUT
-FROM MOUVEMENTSTOCK MS join NATUREMOUVEMENT N on ms.IDNATUREMOUVEMENT=N.IDNATUREMOUVEMENT;
-
-
-DROP VIEW liste_etudiant;
-CREATE OR REPLACE VIEW liste_etudiant AS
-SELECT
-    e.ID as IDETUDIANT,
-    e.NOM,
-    e.PRENOM,
-    e.MAIL,
-    s.VAL as SEXE
-FROM ETUDIANT e join SEXE s on e.SEXE=S.ID;
 
 
 -- Devis
@@ -300,8 +300,8 @@ FROM BONLIVRAISON L join BONCOMMANDE B on b.IDBONCOMMANDE=l.IDBONCOMMANDE  join 
 
 
 CREATE OR REPLACE VIEW stock_article as 
-select coalesce(sum(quantite),0) as quantite,dm.idarticle,la.marque,la.modele,la.description 
-from detailmouvementphysique dm  right join liste_article la on la.idarticle=dm.idarticle group by dm.idarticle,la.marque,la.modele,la.description;
+select coalesce(sum(quantite),0) as quantite,la.idarticle,la.marque,la.modele,la.description,la.IDTYPEMATERIEL,la.TYPEMATERIEL
+from detailmouvementphysique dm  right join liste_article la on la.idarticle=dm.idarticle group by la.idarticle,la.marque,la.modele,la.description,la.IDTYPEMATERIEL,la.TYPEMATERIEL;
 
 
 

@@ -123,18 +123,6 @@ CREATE TABLE natureMouvement(
     natureMouvement varchar2(100) NOT NULL 
 );
 
-CREATE TABLE mouvementStock(
-    idmouvementStock VARCHAR2(50) PRIMARY KEY NOT NULL ,
-    dateDepot TIMESTAMP DEFAULT  current_timestamp,
-    typeMouvement number NOT NULL , /*ENTREE OU SORTIE (1,-1)*/
-    idnatureMouvement VARCHAR2(50) NOT NULL ,
-    statut number DEFAULT  0
-);
-
-ALTER TABLE mouvementStock ADD CONSTRAINT typeMouvementcheck CHECK(typeMouvement IN(1,-1));
-ALTER TABLE mouvementStock ADD FOREIGN KEY(idnatureMouvement) REFERENCES natureMouvement(idnatureMouvement);
-
-
 -- ENTREE SORTIE PHYSIQUE
 CREATE TABLE detailmouvementphysique(
    iddetailmouvementphysique VARCHAR2(50) PRIMARY KEY NOT NULL,
@@ -158,6 +146,18 @@ ALTER TABLE detailmouvementphysique ADD FOREIGN KEY(iddepot) REFERENCES depot(id
 ALTER TABLE detailmouvementphysique ADD FOREIGN KEY(idnatureMouvement) REFERENCES natureMouvement(idnatureMouvement);
 
 
+CREATE TABLE mouvementStock(
+    idmouvementStock VARCHAR2(50) PRIMARY KEY NOT NULL ,
+    dateDepot TIMESTAMP DEFAULT  current_timestamp,
+    typeMouvement number NOT NULL , /*ENTREE OU SORTIE (1,-1)*/
+    idetudiant VARCHAR2(50) NOT NULL ,
+    idnatureMouvement VARCHAR2(50) NOT NULL ,
+    statut number DEFAULT  0
+);
+
+ALTER TABLE mouvementStock ADD CONSTRAINT typeMouvementcheck CHECK(typeMouvement IN(1,-1));
+ALTER TABLE mouvementStock ADD FOREIGN KEY(idnatureMouvement) REFERENCES natureMouvement(idnatureMouvement);
+ALTER TABLE mouvementStock ADD FOREIGN KEY(idetudiant) REFERENCES etudiant(id);
 
 
 -- ENTREE SORTIE FICTIF
@@ -166,7 +166,6 @@ CREATE TABLE detailmouvementfictif(
     idmouvement varchar(50) NOT NULL ,
     dateDeb TIMESTAMP DEFAULT  current_timestamp,
     dateFin TIMESTAMP DEFAULT  NULL,
-    idetudiant varchar(50) NOT NULL ,
     caution NUMBER(10,2) ,
     idmateriel varchar2(50) NOT NULL ,
     iddepot varchar(50) NOT NULL,
@@ -176,7 +175,6 @@ CREATE TABLE detailmouvementfictif(
 );
 
 ALTER TABLE detailmouvementfictif ADD FOREIGN KEY(idmouvement) REFERENCES mouvementStock(idmouvementStock);
-ALTER TABLE detailmouvementfictif ADD FOREIGN KEY(idetudiant) REFERENCES etudiant(id);
 ALTER TABLE detailmouvementfictif ADD FOREIGN KEY(idmateriel) REFERENCES materiel(idmateriel);
 ALTER TABLE detailmouvementfictif ADD FOREIGN KEY(iddepot) REFERENCES depot(iddepot);
 
