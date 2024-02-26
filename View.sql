@@ -304,6 +304,8 @@ select coalesce(sum(quantite),0) as quantite,la.idarticle,la.marque,la.modele,la
 from detailmouvementphysique dm  right join liste_article la on la.idarticle=dm.idarticle group by la.idarticle,la.marque,la.modele,la.description,la.IDTYPEMATERIEL,la.TYPEMATERIEL;
 
 
+CREATE OR REPLACE VIEW stock_materiel as
+select tp.IDTYPEMATERIEL,tp.TYPEMATERIEL,count(lm.IDTYPEMATERIEL) as quantite from liste_materiel lm right join typemateriel tp on lm.IDTYPEMATERIEL=tp.IDTYPEMATERIEL group by tp.IDTYPEMATERIEL,tp.TYPEMATERIEL;
 
 DROP VIEW liste_article;
 DROP VIEW liste_typemateriel;
@@ -321,5 +323,7 @@ DROP VIEW client_proforma;
 DROP VIEW detail_proforma;
 DROP VIEW client_commande;
 DROP VIEW client_livraison;
+DROP VIEW stock_article;
+DROP VIEW stock_materiel;
 
 
