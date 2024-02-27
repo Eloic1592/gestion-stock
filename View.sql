@@ -299,6 +299,7 @@ SELECT
 FROM BONLIVRAISON L join BONCOMMANDE B on b.IDBONCOMMANDE=l.IDBONCOMMANDE  join PROFORMA CP on b.IDPROFORMA=CP.IDPROFORMA  join devis D on CP.IDDEVIS=d.IDDEVIS join CLIENT c  on c.IDCLIENT=d.IDCLIENT;
 
 
+
 CREATE OR REPLACE VIEW stock_article as 
 select coalesce(sum(quantite),0) as quantite,la.idarticle,la.marque,la.modele,la.description,la.IDTYPEMATERIEL,la.TYPEMATERIEL
 from detailmouvementphysique dm  right join liste_article la on la.idarticle=dm.idarticle group by la.idarticle,la.marque,la.modele,la.description,la.IDTYPEMATERIEL,la.TYPEMATERIEL;
@@ -306,6 +307,15 @@ from detailmouvementphysique dm  right join liste_article la on la.idarticle=dm.
 
 CREATE OR REPLACE VIEW stock_materiel as
 select tp.IDTYPEMATERIEL,tp.TYPEMATERIEL,count(lm.IDTYPEMATERIEL) as quantite from liste_materiel lm right join typemateriel tp on lm.IDTYPEMATERIEL=tp.IDTYPEMATERIEL group by tp.IDTYPEMATERIEL,tp.TYPEMATERIEL;
+
+
+CREATE OR REPLACE VIEW stock_article_depot as 
+select coalesce(sum(quantite),0)as quantite,d.iddepot,d.depot from mouvement_physique mp right join depot d on mp.iddepot=d.iddepot group by d.iddepot,d.depot;
+
+
+
+select coalesce(sum(quantite),0)as quantite,la.idarticle,mp.iddepot from liste_article la left join mouvement_physique mp on la.idarticle=mp.idarticle where mp.iddepot='DEP001145' group by la.idarticle;
+
 
 DROP VIEW liste_article;
 DROP VIEW liste_typemateriel;
@@ -325,5 +335,6 @@ DROP VIEW client_commande;
 DROP VIEW client_livraison;
 DROP VIEW stock_article;
 DROP VIEW stock_materiel;
+DROP VIEW stock_article_depot;
 
 
