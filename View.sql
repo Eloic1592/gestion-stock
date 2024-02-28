@@ -300,21 +300,23 @@ FROM BONLIVRAISON L join BONCOMMANDE B on b.IDBONCOMMANDE=l.IDBONCOMMANDE  join 
 
 
 
+-- Stock par article
 CREATE OR REPLACE VIEW stock_article as 
 select coalesce(sum(quantite),0) as quantite,la.idarticle,la.marque,la.modele,la.description,la.IDTYPEMATERIEL,la.TYPEMATERIEL
 from detailmouvementphysique dm  right join liste_article la on la.idarticle=dm.idarticle  group by la.idarticle,la.marque,la.modele,la.description,la.IDTYPEMATERIEL,la.TYPEMATERIEL;
 
-
+-- Stock par materiel
 CREATE OR REPLACE VIEW stock_materiel as
 select tp.IDTYPEMATERIEL,tp.TYPEMATERIEL,count(lm.IDTYPEMATERIEL) as quantite from liste_materiel lm right join typemateriel tp on lm.IDTYPEMATERIEL=tp.IDTYPEMATERIEL group by tp.IDTYPEMATERIEL,tp.TYPEMATERIEL;
 
 
+-- Total des articles par depot
 CREATE OR REPLACE VIEW stock_article_depot as 
 select coalesce(sum(quantite),0)as quantite,d.iddepot,d.depot from mouvement_physique mp right join depot d on mp.iddepot=d.iddepot group by d.iddepot,d.depot;
 
 
 
-
+-- Total des articles par type de materiel par depot
 CREATE OR REPLACE VIEW stock_typemateriel_depot as
 SELECT COALESCE(SUM(mp.quantite), 0) AS nombre,
        tp.idtypemateriel,
@@ -322,10 +324,16 @@ SELECT COALESCE(SUM(mp.quantite), 0) AS nombre,
        d.iddepot,
        d.depot
 FROM typemateriel tp 
-CROSS JOIN depot d -- Si chaque type de matériel est associé à chaque dépôt
+CROSS JOIN depot d 
 LEFT JOIN liste_article la ON tp.idtypemateriel = la.idtypemateriel 
 LEFT JOIN mouvement_physique mp ON la.idarticle = mp.idarticle AND mp.iddepot = d.iddepot
 GROUP BY tp.idtypemateriel, tp.typemateriel,d.iddepot,d.depot;
+
+-- Chiffres d'affaires groupee par type de materiel
+CREATE OR REPLACE VIEW chiffre_affaires as 
+select coalesce(sum(mp.total),0)as chiffre_affaire,coalesce(sum(mp.total*1),0)as gain,tp.idtypemateriel,tp.typemateriel FROM typemateriel tp  LEFT JOIN liste_article la ON tp.idtypemateriel = la.idtypemateriel LEFT JOIN mouvement_physique mp ON la.idarticle = mp.idarticle GROUP BY tp.idtypemateriel, tp.typemateriel;
+
+
 
 
 
