@@ -302,7 +302,7 @@ FROM BONLIVRAISON L join BONCOMMANDE B on b.IDBONCOMMANDE=l.IDBONCOMMANDE  join 
 
 CREATE OR REPLACE VIEW stock_article as 
 select coalesce(sum(quantite),0) as quantite,la.idarticle,la.marque,la.modele,la.description,la.IDTYPEMATERIEL,la.TYPEMATERIEL
-from detailmouvementphysique dm  right join liste_article la on la.idarticle=dm.idarticle where dm.STATUT=0 group by la.idarticle,la.marque,la.modele,la.description,la.IDTYPEMATERIEL,la.TYPEMATERIEL;
+from detailmouvementphysique dm  right join liste_article la on la.idarticle=dm.idarticle  group by la.idarticle,la.marque,la.modele,la.description,la.IDTYPEMATERIEL,la.TYPEMATERIEL;
 
 
 CREATE OR REPLACE VIEW stock_materiel as
