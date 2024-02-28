@@ -302,7 +302,7 @@ FROM BONLIVRAISON L join BONCOMMANDE B on b.IDBONCOMMANDE=l.IDBONCOMMANDE  join 
 
 CREATE OR REPLACE VIEW stock_article as 
 select coalesce(sum(quantite),0) as quantite,la.idarticle,la.marque,la.modele,la.description,la.IDTYPEMATERIEL,la.TYPEMATERIEL
-from detailmouvementphysique dm  right join liste_article la on la.idarticle=dm.idarticle group by la.idarticle,la.marque,la.modele,la.description,la.IDTYPEMATERIEL,la.TYPEMATERIEL;
+from detailmouvementphysique dm  right join liste_article la on la.idarticle=dm.idarticle where dm.STATUT=0 group by la.idarticle,la.marque,la.modele,la.description,la.IDTYPEMATERIEL,la.TYPEMATERIEL;
 
 
 CREATE OR REPLACE VIEW stock_materiel as
@@ -314,7 +314,19 @@ select coalesce(sum(quantite),0)as quantite,d.iddepot,d.depot from mouvement_phy
 
 
 
-select coalesce(sum(quantite),0)as quantite,la.idarticle,mp.iddepot from liste_article la left join mouvement_physique mp on la.idarticle=mp.idarticle where mp.iddepot='DEP001145' group by la.idarticle;
+
+CREATE OR REPLACE VIEW stock_typemateriel_depot as
+SELECT COALESCE(SUM(mp.quantite), 0) AS nombre,
+       tp.idtypemateriel,
+       tp.typemateriel,
+       d.iddepot,
+       d.depot
+FROM typemateriel tp 
+CROSS JOIN depot d -- Si chaque type de matériel est associé à chaque dépôt
+LEFT JOIN liste_article la ON tp.idtypemateriel = la.idtypemateriel 
+LEFT JOIN mouvement_physique mp ON la.idarticle = mp.idarticle AND mp.iddepot = d.iddepot
+GROUP BY tp.idtypemateriel, tp.typemateriel,d.iddepot,d.depot;
+
 
 
 DROP VIEW liste_article;
@@ -336,5 +348,7 @@ DROP VIEW client_livraison;
 DROP VIEW stock_article;
 DROP VIEW stock_materiel;
 DROP VIEW stock_article_depot;
+
+
 
 
