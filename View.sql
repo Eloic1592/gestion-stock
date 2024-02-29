@@ -70,15 +70,12 @@ select dmp.IDDETAILMOUVEMENTPHYSIQUE,
            WHEN -1 THEN
             'SORTIE'
         END as MOUVEMENT,
+        nm.IDNATUREMOUVEMENT,
        nm.NATUREMOUVEMENT,
        a.IDARTICLE,
        a.MARQUE,
        a.MODELE,
-        case dmp.TYPEMOUVEMENT WHEN 1 THEN
-            dmp.QUANTITE*1
-           WHEN -1 THEN
-            dmp.QUANTITE*-1
-        END as QUANTITE,
+        dmp.QUANTITE,
        dmp.PU,
        dmp.TOTAL,
        dmp.RESTESTOCK,
@@ -329,9 +326,38 @@ LEFT JOIN liste_article la ON tp.idtypemateriel = la.idtypemateriel
 LEFT JOIN mouvement_physique mp ON la.idarticle = mp.idarticle AND mp.iddepot = d.iddepot
 GROUP BY tp.idtypemateriel, tp.typemateriel,d.iddepot,d.depot;
 
--- Chiffres d'affaires groupee par type de materiel
-CREATE OR REPLACE VIEW chiffre_affaires as 
-select coalesce(sum(mp.total),0)as chiffre_affaire,coalesce(sum(mp.total*1),0)as gain,tp.idtypemateriel,tp.typemateriel FROM typemateriel tp  LEFT JOIN liste_article la ON tp.idtypemateriel = la.idtypemateriel LEFT JOIN mouvement_physique mp ON la.idarticle = mp.idarticle GROUP BY tp.idtypemateriel, tp.typemateriel;
+
+
+-- Chiffres d'affaires groupee par type de mouvement
+CREATE OR REPLACE view stat_naturemouvement as 
+WITH TousLesMois AS (
+    SELECT 
+        TO_CHAR(ADD_MONTHS(TO_DATE('01-01-' || TO_CHAR(SYSDATE, 'YYYY')), LEVEL - 1), 'MM') AS mois,
+        TO_CHAR(ADD_MONTHS(TO_DATE('01-01-' || TO_CHAR(SYSDATE, 'YYYY')), LEVEL - 1), 'YYYY') AS annee
+    FROM DUAL
+    CONNECT BY LEVEL <= 12
+)
+SELECT 
+    TousLesMois.annee,
+    TousLesMois.mois,
+    NVL(SUM(CASE WHEN mp.TYPEMOUVEMENT = -1 THEN mp.total ELSE 0 END), 0) AS gain,
+    NVL(SUM(CASE WHEN mp.TYPEMOUVEMENT = 1 THEN mp.total ELSE 0 END), 0) AS depense,
+    NVL(SUM(mp.total), 0) AS benefice,
+    nm.IDNATUREMOUVEMENT,
+    nm.NATUREMOUVEMENT
+FROM 
+    TousLesMois
+CROSS JOIN 
+    NATUREMOUVEMENT nm
+LEFT JOIN 
+    mouvement_physique mp ON EXTRACT(MONTH FROM mp.DATEDEPOT) = TousLesMois.mois 
+                            AND EXTRACT(YEAR FROM mp.DATEDEPOT) = TousLesMois.annee 
+                            AND nm.IDNATUREMOUVEMENT = mp.IDNATUREMOUVEMENT
+GROUP BY 
+    TousLesMois.annee, TousLesMois.mois, nm.IDNATUREMOUVEMENT, nm.NATUREMOUVEMENT
+ORDER BY 
+    TousLesMois.annee, TousLesMois.mois, nm.IDNATUREMOUVEMENT;
+
 
 
 
@@ -356,6 +382,8 @@ DROP VIEW client_livraison;
 DROP VIEW stock_article;
 DROP VIEW stock_materiel;
 DROP VIEW stock_article_depot;
+DROP VIEW stock_typemateriel_depot;
+DROP VIEW stat_naturemouvement;
 
 
 
