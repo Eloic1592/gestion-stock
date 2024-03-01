@@ -328,18 +328,20 @@ GROUP BY tp.idtypemateriel, tp.typemateriel,d.iddepot,d.depot;
 
 
 
--- Chiffres d'affaires groupee par type de mouvement
+-- Benefice groupee par type de mouvement
 CREATE OR REPLACE view stat_naturemouvement as 
 WITH TousLesMois AS (
     SELECT 
         TO_CHAR(ADD_MONTHS(TO_DATE('01-01-' || TO_CHAR(SYSDATE, 'YYYY')), LEVEL - 1), 'MM') AS mois,
-        TO_CHAR(ADD_MONTHS(TO_DATE('01-01-' || TO_CHAR(SYSDATE, 'YYYY')), LEVEL - 1), 'YYYY') AS annee
+        TO_CHAR(ADD_MONTHS(TO_DATE('01-01-' || TO_CHAR(SYSDATE, 'YYYY')), LEVEL - 1), 'YYYY') AS annee,
+        TO_CHAR(ADD_MONTHS(TO_DATE('01-01-' || TO_CHAR(SYSDATE, 'YYYY')), LEVEL - 1), 'MONTH') AS mois_nom
     FROM DUAL
     CONNECT BY LEVEL <= 12
 )
 SELECT 
     TousLesMois.annee,
     TousLesMois.mois,
+    TousLesMois.mois_nom,
     NVL(SUM(CASE WHEN mp.TYPEMOUVEMENT = -1 THEN mp.total ELSE 0 END), 0) AS gain,
     NVL(SUM(CASE WHEN mp.TYPEMOUVEMENT = 1 THEN mp.total ELSE 0 END), 0) AS depense,
     NVL(SUM(mp.total), 0) AS benefice,
@@ -354,14 +356,89 @@ LEFT JOIN
                             AND EXTRACT(YEAR FROM mp.DATEDEPOT) = TousLesMois.annee 
                             AND nm.IDNATUREMOUVEMENT = mp.IDNATUREMOUVEMENT
 GROUP BY 
-    TousLesMois.annee, TousLesMois.mois, nm.IDNATUREMOUVEMENT, nm.NATUREMOUVEMENT
+    TousLesMois.annee, TousLesMois.mois, TousLesMois.mois_nom, nm.IDNATUREMOUVEMENT, nm.NATUREMOUVEMENT
 ORDER BY 
     TousLesMois.annee, TousLesMois.mois, nm.IDNATUREMOUVEMENT;
 
 
+WITH DatesMinMax AS (
+    SELECT 
+        TO_CHAR(MIN(mp.DATEDEPOT), 'YYYY-MM') AS min_date,
+        TO_CHAR(MAX(mp.DATEDEPOT), 'YYYY-MM') AS max_date
+    FROM 
+        mouvement_physique mp
+),
+ToutesLesDates AS (
+    SELECT DISTINCT
+        TO_CHAR(mp.DATEDEPOT, 'YYYY-MM') AS mois_annee
+    FROM 
+        mouvement_physique mp
+    CROSS JOIN 
+        DatesMinMax
+    WHERE 
+        TO_CHAR(mp.DATEDEPOT, 'YYYY-MM') BETWEEN DatesMinMax.min_date AND DatesMinMax.max_date
+),
+GainDepenseBenefice AS (
+    SELECT 
+        TO_CHAR(mp.DATEDEPOT, 'YYYY-MM') AS mois_annee,
+        nm.IDNATUREMOUVEMENT,
+        SUM(CASE WHEN mp.TYPEMOUVEMENT = -1 THEN mp.total ELSE 0 END) AS gain,
+        SUM(CASE WHEN mp.TYPEMOUVEMENT = 1 THEN mp.total ELSE 0 END) AS depense,
+        SUM(mp.total) AS benefice
+    FROM 
+        mouvement_physique mp
+    CROSS JOIN 
+        DatesMinMax
+    LEFT JOIN 
+        NATUREMOUVEMENT nm ON mp.IDNATUREMOUVEMENT = nm.IDNATUREMOUVEMENT
+    WHERE 
+        TO_CHAR(mp.DATEDEPOT, 'YYYY-MM') BETWEEN DatesMinMax.min_date AND DatesMinMax.max_date
+    GROUP BY 
+        TO_CHAR(mp.DATEDEPOT, 'YYYY-MM'), nm.IDNATUREMOUVEMENT
+)
+SELECT 
+    ToutesLesDates.mois_annee,
+    gdb.IDNATUREMOUVEMENT,
+    nm.NATUREMOUVEMENT,
+    NVL(SUM(gdb.gain), 0) AS total_gain,
+    NVL(SUM(gdb.depense), 0) AS total_depense,
+    NVL(SUM(gdb.benefice), 0) AS total_benefice
+FROM 
+    ToutesLesDates
+LEFT JOIN 
+    GainDepenseBenefice gdb ON ToutesLesDates.mois_annee = gdb.mois_annee
+LEFT JOIN 
+    NATUREMOUVEMENT nm ON gdb.IDNATUREMOUVEMENT = nm.IDNATUREMOUVEMENT
+GROUP BY 
+    ToutesLesDates.mois_annee, gdb.IDNATUREMOUVEMENT, nm.NATUREMOUVEMENT
+ORDER BY 
+    ToutesLesDates.mois_annee, gdb.IDNATUREMOUVEMENT;
 
 
 
+
+-- Chiffre d'affaires par jour
+-- Depart
+WITH TousLesJours AS (
+    SELECT 
+        TRUNC(LAST_DAY(TO_DATE('01-02-2024', 'DD-MM-YYYY')) - LEVEL + 1) AS jour
+    FROM DUAL
+    CONNECT BY LEVEL <= TO_NUMBER(TO_CHAR(LAST_DAY(TO_DATE('01-02-2024', 'DD-MM-YYYY')), 'DD'))
+)
+SELECT 
+    TousLesJours.jour,
+    SUM(CASE WHEN mp.TYPEMOUVEMENT = -1 THEN mp.total ELSE 0 END) AS gain,
+    SUM(CASE WHEN mp.TYPEMOUVEMENT = 1 THEN mp.total ELSE 0 END) AS depense,
+    SUM(mp.total) AS chiffre_affaires_total
+FROM 
+    TousLesJours
+LEFT JOIN 
+    mouvement_physique mp ON TRUNC(mp.DATEDEPOT) = TousLesJours.jour
+GROUP BY 
+    TousLesJours.jour
+ORDER BY 
+    TousLesJours.jour;
+ 
 
 DROP VIEW liste_article;
 DROP VIEW liste_typemateriel;
