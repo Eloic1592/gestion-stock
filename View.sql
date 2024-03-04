@@ -306,9 +306,9 @@ CREATE OR REPLACE VIEW stock_article as
 select coalesce(sum(quantite),0) as quantite,la.idarticle,la.marque,la.modele,la.description,la.IDTYPEMATERIEL,la.TYPEMATERIEL
 from detailmouvementphysique dm  right join liste_article la on la.idarticle=dm.idarticle  group by la.idarticle,la.marque,la.modele,la.description,la.IDTYPEMATERIEL,la.TYPEMATERIEL;
 
--- Stock par materiel
-CREATE OR REPLACE VIEW stock_materiel as
-select tp.IDTYPEMATERIEL,tp.TYPEMATERIEL,count(lm.IDTYPEMATERIEL) as quantite from liste_materiel lm right join typemateriel tp on lm.IDTYPEMATERIEL=tp.IDTYPEMATERIEL group by tp.IDTYPEMATERIEL,tp.TYPEMATERIEL;
+-- -- Stock par materiel
+-- CREATE OR REPLACE VIEW stock_materiel as
+-- select tp.IDTYPEMATERIEL,tp.TYPEMATERIEL,count(lm.IDTYPEMATERIEL) as quantite from liste_materiel lm right join typemateriel tp on lm.IDTYPEMATERIEL=tp.IDTYPEMATERIEL group by tp.IDTYPEMATERIEL,tp.TYPEMATERIEL;
 
 
 -- Total des articles par depot
@@ -453,22 +453,10 @@ select IDNATUREMOUVEMENT,
 
 Create or replace mouvement_laptop as
 select count(lm.IDMATERIEL) from  liste_materiel lm  LEFT OUTER JOIN  DETAILMOUVEMENTFICTIF  mf on mf.IDMATERIEL=lm.IDMATERIEL WHERE mf.IDMATERIEL IS NULL;
- 
 
-SELECT lm.IDMATERIEL,
-       COUNT(mf.IDMATERIEL) AS OCCUPES,
-       COUNT(CASE WHEN mf.IDMATERIEL IS NULL THEN 1 END) AS LIBRES
-FROM liste_materiel lm
-LEFT OUTER JOIN DETAILMOUVEMENTFICTIF mf ON mf.IDMATERIEL = lm.IDMATERIEL
-GROUP BY lm.IDMATERIEL;
 
-SELECT 
-    (SELECT COUNT(*) FROM DETAILMOUVEMENTFICTIF) AS OCCUPES,
-    (SELECT COUNT(*) FROM liste_materiel lm 
-     LEFT OUTER JOIN DETAILMOUVEMENTFICTIF mf 
-     ON mf.IDMATERIEL = lm.IDMATERIEL
-     WHERE mf.IDMATERIEL IS NULL) AS LIBRES
-FROM dual;
+CREATE OR REPLACE VIEW stock_materiel as 
+select (select count(idtypemateriel) from materiel where statut=1 AND idtypemateriel=t.idtypemateriel) as libre,(select count(idtypemateriel) from materiel where statut=0 AND idtypemateriel=t.idtypemateriel) as occupe,t.idtypemateriel,t.typemateriel from liste_materiel lm right join typemateriel t on lm.idtypemateriel=t.idtypemateriel group by t.idtypemateriel,t.typemateriel;
 
 
 
