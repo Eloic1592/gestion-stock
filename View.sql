@@ -451,9 +451,6 @@ select IDNATUREMOUVEMENT,
     NATUREMOUVEMENT 
     from NATUREMOUVEMENT;
 
-Create or replace mouvement_laptop as
-select count(lm.IDMATERIEL) from  liste_materiel lm  LEFT OUTER JOIN  DETAILMOUVEMENTFICTIF  mf on mf.IDMATERIEL=lm.IDMATERIEL WHERE mf.IDMATERIEL IS NULL;
-
 
 CREATE OR REPLACE VIEW stock_materiel as 
 select (select count(idtypemateriel) from materiel where statut=1 AND idtypemateriel=t.idtypemateriel) as libre,(select count(idtypemateriel) from materiel where statut=0 AND idtypemateriel=t.idtypemateriel) as occupe,t.idtypemateriel,t.typemateriel from liste_materiel lm right join typemateriel t on lm.idtypemateriel=t.idtypemateriel group by t.idtypemateriel,t.typemateriel;
@@ -481,6 +478,7 @@ DROP VIEW stock_materiel;
 DROP VIEW stock_article_depot;
 DROP VIEW stock_typemateriel_depot;
 DROP VIEW stat_naturemouvement;
+DROP VIEW liste_nature; 
 
 
 
