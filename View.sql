@@ -455,21 +455,26 @@ select (select count(idtypemateriel) from materiel where statut=0 AND idtypemate
 
 
 -- Stock materiel par depot
-Create OR REPLACE VIEW pourcentage_utilisation as 
+Create OR REPLACE VIEW utilisation_materiel as 
 SELECT 
+    d.iddepot,
     d.depot,
-    COUNT(m.idmateriel) AS total_materiels,
-    COUNT(df.idmateriel) AS materiels_utilises,
-    (COUNT(df.idmateriel) / COUNT(m.idmateriel)) * 100 AS pourcentage_utilisation
+    COUNT(m.idmateriel) AS totalmateriels,
+    COUNT(df.idmateriel) AS materielsutilises,
+    CASE 
+        WHEN COUNT(m.idmateriel) = 0 THEN 0
+        ELSE (COUNT(df.idmateriel) / NULLIF(COUNT(m.idmateriel), 0)) * 100 
+    END AS pourcentage_utilisation
 FROM 
     depot d
 LEFT JOIN 
     DETAILMOUVEMENTFICTIF df ON df.iddepot = d.iddepot
 LEFT JOIN 
-    liste_materiel m ON m.idmateriel
-     = df.idmateriel
-GROUP BY 
+    liste_materiel m ON m.idmateriel = df.idmateriel
+GROUP BY
+    d.iddepot, 
     d.depot;
+
 
 
 
