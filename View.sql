@@ -445,6 +445,7 @@ ORDER BY
 Create or replace view liste_nature as 
 select IDNATUREMOUVEMENT,
     case TYPEMOUVEMENT WHEN 1 THEN 'PHYSIQUE' WHEN 0 THEN 'FICTIF' END as TYPEMOUVEMENT,
+    TYPEMOUVEMENT as TYPE,
     NATUREMOUVEMENT 
     from NATUREMOUVEMENT;
 
@@ -474,7 +475,6 @@ LEFT JOIN
 GROUP BY
     d.iddepot, 
     d.depot;
-
 
 
 
