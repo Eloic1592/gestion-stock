@@ -362,6 +362,63 @@ ORDER BY
     TousLesMois.annee, TousLesMois.mois, nm.IDNATUREMOUVEMENT;
 
 
+
+CREATE OR REPLACE view stat_naturemouvement as 
+WITH DateMinMax AS (
+    SELECT 
+        TO_CHAR(MIN(DATEDEPOT), 'YYYY') AS min_year,
+        TO_CHAR(MAX(DATEDEPOT), 'YYYY') AS max_year
+    FROM mouvement_physique
+),
+AllYears AS (
+    SELECT 
+        TO_CHAR(ADD_MONTHS(TO_DATE('01-01-' || min_year), 12 * (LEVEL - 1)), 'YYYY') AS annee
+    FROM DateMinMax
+    CONNECT BY LEVEL <= CEIL(MONTHS_BETWEEN(TO_DATE(max_year, 'YYYY'), TO_DATE(min_year, 'YYYY')) / 12) + 1
+),
+AllMonths AS (
+    SELECT 
+        TO_CHAR(ADD_MONTHS(TO_DATE('01-01-' || annee), LEVEL - 1), 'MM') AS mois,
+        TO_CHAR(ADD_MONTHS(TO_DATE('01-01-' || annee), LEVEL - 1), 'MONTH') AS mois_nom,
+        annee
+    FROM AllYears
+    CONNECT BY LEVEL <= 12
+)
+SELECT 
+    AllMonths.annee,
+    AllMonths.mois,
+    AllMonths.mois_nom,
+    NVL(SUM(CASE WHEN mp.TYPEMOUVEMENT = -1 THEN mp.total ELSE 0 END), 0) AS gain,
+    NVL(SUM(CASE WHEN mp.TYPEMOUVEMENT = 1 THEN mp.total ELSE 0 END), 0) AS depense,
+    NVL(SUM(mp.total), 0) AS benefice,
+        nm.IDNATUREMOUVEMENT,
+    nm.NATUREMOUVEMENT
+FROM 
+    AllMonths
+CROSS JOIN 
+    NATUREMOUVEMENT nm
+LEFT JOIN 
+    mouvement_physique mp ON EXTRACT(MONTH FROM mp.DATEDEPOT) = AllMonths.mois 
+                            AND EXTRACT(YEAR FROM mp.DATEDEPOT) = AllMonths.annee 
+                            AND nm.IDNATUREMOUVEMENT = mp.IDNATUREMOUVEMENT
+GROUP BY 
+    AllMonths.annee, AllMonths.mois, AllMonths.mois_nom, nm.IDNATUREMOUVEMENT, nm.NATUREMOUVEMENT
+ORDER BY 
+    AllMonths.annee, AllMonths.mois, nm.IDNATUREMOUVEMENT;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 WITH DatesMinMax AS (
     SELECT 
         TO_CHAR(MIN(mp.DATEDEPOT), 'YYYY-MM') AS min_date,
