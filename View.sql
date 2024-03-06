@@ -7,14 +7,8 @@ SELECT
     tm.IDTYPEMATERIEL,
     tm.TYPEMATERIEL,
     m.MARQUE,
-        CASE 
-        WHEN m.MODELE IS NULL OR m.MODELE = '' THEN N'Aucune description'
-        ELSE m.MODELE
-    END AS MODELE,
-    CASE 
-        WHEN m.DESCRIPTION IS NULL OR m.DESCRIPTION = '' THEN N'Aucune description'
-        ELSE m.DESCRIPTION
-    END AS DESCRIPTION
+    m.MODELE,
+    m.DESCRIPTION
 FROM 
     ARTICLE m
 JOIN 
@@ -40,17 +34,11 @@ SELECT
     tm.IDTYPEMATERIEL,
     tm.TYPEMATERIEL,
     m.MARQUE,
-        CASE 
-        WHEN m.MODELE IS NULL OR m.MODELE = '' THEN N'Aucune description'
-        ELSE m.MODELE
-    END AS MODELE,
+    m.MODELE,
     m.NUMSERIE,
-    m.COULEUR,
-    CASE 
-        WHEN m.DESCRIPTION IS NULL OR m.DESCRIPTION = '' THEN N'Aucune description'
-        ELSE m.DESCRIPTION
-    END AS DESCRIPTION,
+    m.DESCRIPTION,
     m.PRIXVENTE,
+    m.COULEUR,
     m.CAUTION,
     m.SIGNATURE,
     CASE 
@@ -82,13 +70,9 @@ select dmp.IDDETAILMOUVEMENTPHYSIQUE,
         dmp.QUANTITE,
        dmp.PU,
        dmp.TOTAL,
-       dmp.RESTESTOCK,
        d.IDDEPOT,
        d.DEPOT,
-        CASE 
-        WHEN dmp.DESCRIPTION IS NULL OR dmp.DESCRIPTION = '' THEN N'Aucune description'
-        ELSE dmp.DESCRIPTION
-        END AS DESCRIPTION,
+        dmp.DESCRIPTION,
        dmp.COMMENTAIRE,
        dmp.STATUT
 from  DETAILMOUVEMENTPHYSIQUE dmp
@@ -111,7 +95,6 @@ SELECT
         END as MOUVEMENT,
         N.IDNATUREMOUVEMENT,
         N.NATUREMOUVEMENT,
-        N.TYPEMOUVEMENT,
         E.ID as IDETUDIANT,
         E.NOM,
         E.PRENOM,
@@ -150,10 +133,7 @@ select dmf.IDDETAILMOUVEMENTFICTIF,
        dmf.DATEDEB,
        dmf.DATEFIN,
        dmf.COMMENTAIRE,
-        CASE 
-        WHEN dmf.DESCRIPTION IS NULL OR dmf.DESCRIPTION = '' THEN N'Aucune description'
-        ELSE dmf.DESCRIPTION
-        END AS DESCRIPTION,
+       dmf.DESCRIPTION,
        dmf.STATUT
 from  DETAILMOUVEMENTFICTIF dmf
           join MOUVEMENTSTOCK ms on ms.IDMOUVEMENTSTOCK = dmf.IDMOUVEMENT

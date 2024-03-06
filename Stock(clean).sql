@@ -37,8 +37,8 @@ ALTER TABLE typeMateriel ADD FOREIGN KEY (idcategorieMateriel) REFERENCES catego
 CREATE TABLE article(
     idarticle VARCHAR2(50) PRIMARY KEY NOT NULL ,
     marque NVARCHAR2(100),
-    modele NVARCHAR2(1000),
-    description NVARCHAR2(1000),
+    modele NVARCHAR2(1000) DEFAULT 'Modele non precise',
+    description NVARCHAR2(1000) DEFAULT 'Aucune description',
     idtypeMateriel VARCHAR2(100) NOT NULL
 );
 
@@ -47,15 +47,15 @@ ALTER TABLE article ADD FOREIGN KEY (idtypeMateriel) REFERENCES typeMateriel(idt
 CREATE TABLE materiel(
     idmateriel VARCHAR2(50) PRIMARY KEY NOT NULL,
     marque NVARCHAR2(100),
-    modele NVARCHAR2(1000),
+    modele NVARCHAR2(1000) DEFAULT 'Modele non precise',
     numSerie VARCHAR2(100) NOT NULL,
-    description NVARCHAR2(1000),
-    prixVente NUMBER(10,2) NOT NULL,
-    caution NUMBER(10,2) NOT NULL,
+    description NVARCHAR2(1000) DEFAULT 'Aucune description',
+    prixVente NUMBER(15,2) DEFAULT 0,
+    caution NUMBER(15,2) DEFAULT 0,
     couleur VARCHAR2(100) NOT NULL,
     idtypeMateriel VARCHAR2(100) NOT NULL,
     statut NUMBER DEFAULT 0,
-    signature VARCHAR2(10) CHECK (signature IN ('Perso', 'ITU','Aucun appartenance'))
+    signature VARCHAR2(10) DEFAULT 'ITU'
 );
 ALTER TABLE materiel ADD FOREIGN KEY (idtypeMateriel) REFERENCES typeMateriel(idtypeMateriel);
 
@@ -68,23 +68,23 @@ CREATE TABLE depot(
 
 CREATE TABLE natureMouvement(
     idnatureMouvement VARCHAR2(50) PRIMARY KEY NOT NULL ,
-    natureMouvement varchar2(100) NOT NULL 
+    natureMouvement varchar2(100) NOT NULL,
+    typeMouvement NUMBER DEFAULT 0
 );
 
 -- ENTREE SORTIE PHYSIQUE
 CREATE TABLE detailmouvementphysique(
    iddetailmouvementphysique VARCHAR2(50) PRIMARY KEY NOT NULL,
-   typeMouvement number NOT NULL , /*ENTREE OU SORTIE (1,-1)*/
+   typeMouvement NUMBER NOT NULL CHECK (typeMouvement in(1,-1)), /*ENTREE OU SORTIE (1,-1)*/
    idnatureMouvement VARCHAR2(50) NOT NULL ,
    datedepot TIMESTAMP DEFAULT current_timestamp,
    idarticle VARCHAR2(50) NOT NULL,
-   quantite NUMBER(10,2)  DEFAULT 0,
-   PU NUMBER(10,2)  DEFAULT 0,
-   total NUMBER(10,2)  DEFAULT 0,
-   restestock NUMBER(10,2) DEFAULT 0,
+   quantite NUMBER(15,2)  DEFAULT 0,
+   PU NUMBER(15,2)  DEFAULT 0,
+   total NUMBER(15,2)  DEFAULT 0,
    iddepot VARCHAR2(50) NOT NULL,
-   description NVARCHAR2(1000),
-   commentaire NVARCHAR2(1000),
+   description NVARCHAR2(1000) DEFAULT 'Aucune description',
+   commentaire NVARCHAR2(1000) DEFAULT 'Aucun commentaire',
    statut NUMBER DEFAULT 0
 );
 
@@ -95,9 +95,9 @@ ALTER TABLE detailmouvementphysique ADD FOREIGN KEY(idnatureMouvement) REFERENCE
 
 
 CREATE TABLE mouvementStock(
-    idmouvementStock VARCHAR2(50) PRIMARY KEY NOT NULL ,
+    idmouvementStock VARCHAR2(50) PRIMARY KEY NOT NULL,
     dateDepot TIMESTAMP DEFAULT  current_timestamp,
-    typeMouvement number NOT NULL , /*ENTREE OU SORTIE (1,-1)*/
+    typeMouvement number NOT NULL CHECK (typeMouvement in(1,-1)), 
     idetudiant VARCHAR2(50) NOT NULL ,
     idnatureMouvement VARCHAR2(50) NOT NULL ,
     statut number DEFAULT  0
@@ -113,12 +113,12 @@ CREATE TABLE detailmouvementfictif(
     iddetailmouvementfictif VARCHAR2(50) PRIMARY KEY NOT NULL ,
     idmouvement varchar(50) NOT NULL ,
     dateDeb TIMESTAMP DEFAULT  current_timestamp,
-    dateFin TIMESTAMP DEFAULT  NULL,
-    caution NUMBER(10,2) ,
+    dateFin TIMESTAMP DEFAULT  current_timestamp,
+    caution NUMBER(15,2) DEFAULT  0,
     idmateriel varchar2(50) NOT NULL ,
     iddepot varchar(50) NOT NULL,
-    description NVARCHAR2(1000),
-    commentaire NVARCHAR2(1000),
+    description NVARCHAR2(1000) DEFAULT 'Aucune description',
+    commentaire NVARCHAR2(1000)DEFAULT 'Aucun commentaire',
     statut number DEFAULT  0
 );
 
@@ -144,10 +144,10 @@ CREATE TABLE detaildevis(
     iddetaildevis VARCHAR(50) PRIMARY KEY,
     iddevis VARCHAR2(100) NOT NULL ,
     idarticle VARCHAR2(100) NOT NULL ,
-    description NVARCHAR2(1000),
-    quantite NUMBER(10,2) NOT NULL ,
-    PU NUMBER(10,2) DEFAULT  0 NOT NULL ,
-    total NUMBER(10,2) DEFAULT  0 NOT NULL 
+    description NVARCHAR2(1000)  DEFAULT 'Aucune description',
+    quantite NUMBER(15,2) DEFAULT  0 NOT NULL ,
+    PU NUMBER(15,2) DEFAULT  0 NOT NULL ,
+    total NUMBER(15,2) DEFAULT  0 NOT NULL 
 );
 
 ALTER TABLE detaildevis ADD FOREIGN KEY(iddevis) REFERENCES devis(iddevis);
@@ -207,17 +207,17 @@ ALTER TABLE paiement ADD FOREIGN KEY(idmodepaiement) REFERENCES modepaiement(id)
 -- Drop table
 DROP TABLE paiement;
 DROP TABLE facturemateriel;
+DROP TABLE bonlivraison;
+DROP TABLE boncommande;
+DROP TABLE proforma;
+DROP TABLE detaildevis;
+DROP TABLE devis;
 DROP TABLE detailmouvementfictif;
 DROP TABLE detailmouvementphysique;
 DROP TABLE mouvementStock;
 DROP TABLE natureMouvement;
 DROP TABLE depot;
 DROP TABLE materiel;
-DROP TABLE bonlivraison;
-DROP TABLE boncommande;
-DROP TABLE proforma;
-DROP TABLE detaildevis;
-DROP TABLE devis;
 DROP TABLE article;
 DROP TABLE typeMateriel;
 DROP TABLE categorieMateriel;
