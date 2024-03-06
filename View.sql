@@ -391,9 +391,9 @@ SELECT
     AllMonths.annee,
     AllMonths.mois,
     AllMonths.mois_nom,
-    NVL(SUM(CASE WHEN mp.TYPEMOUVEMENT = -1 THEN mp.total ELSE 0 END), 0) AS gain,
-    NVL(SUM(CASE WHEN mp.TYPEMOUVEMENT = 1 THEN mp.total ELSE 0 END), 0) AS depense,
-    NVL(SUM(mp.total), 0) AS benefice,
+    TO_CHAR(NVL(SUM(CASE WHEN mp.TYPEMOUVEMENT = -1 THEN mp.total ELSE 0 END), 0), '9999999999999') AS gain,
+    TO_CHAR(NVL(SUM(CASE WHEN mp.TYPEMOUVEMENT = 1 THEN mp.total ELSE 0 END), 0), '9999999999999') AS depense,
+    TO_CHAR(NVL(SUM(mp.total), 0), '9999999999999') AS benefice,
         nm.IDNATUREMOUVEMENT,
     nm.NATUREMOUVEMENT
 FROM 
