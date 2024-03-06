@@ -246,7 +246,7 @@ from DETAILDEVIS dv
          join DEVIS c on dv.IDDEVIS = c.IDDEVIS;
 
 
-
+-- Proforma
 drop view client_proforma;
 CREATE OR REPLACE view client_proforma as
 SELECT
@@ -269,6 +269,8 @@ SELECT
     d.*
 FROM PROFORMA P join DETAIL_DEVIS D on p.IDDEVIS=d.IDDEVIS;
 
+
+-- Commande
 drop view client_commande;
 CREATE OR REPLACE view client_commande as
 SELECT
@@ -284,6 +286,7 @@ SELECT
 FROM BONCOMMANDE B join PROFORMA CP on b.IDPROFORMA=CP.IDPROFORMA  join devis D on CP.IDDEVIS=d.IDDEVIS join CLIENT c  on c.IDCLIENT=d.IDCLIENT left outer join BONLIVRAISON l on b.IDBONCOMMANDE=l.IDBONCOMMANDE WHERE  l.IDBONCOMMANDE IS NULL;
 
 
+-- Livraison
 drop view client_livraison;
 CREATE OR REPLACE view client_livraison as
 SELECT

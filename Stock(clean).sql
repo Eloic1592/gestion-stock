@@ -60,58 +60,6 @@ CREATE TABLE materiel(
 ALTER TABLE materiel ADD FOREIGN KEY (idtypeMateriel) REFERENCES typeMateriel(idtypeMateriel);
 
 
-
-CREATE TABLE devis(
-    iddevis VARCHAR2(50) PRIMARY KEY NOT NULL ,
-    idclient varchar2(100) NOT NULL , 
-    datedevis TIMESTAMP DEFAULT current_timestamp,
-    statut number DEFAULT  0,
-    libelle NVARCHAR2(1000)
-);
-
-ALTER TABLE devis ADD FOREIGN KEY (idclient) REFERENCES client(idclient);
-
-
-CREATE TABLE detaildevis(
-    iddetaildevis VARCHAR(50) PRIMARY KEY,
-    iddevis VARCHAR2(100) NOT NULL ,
-    idarticle VARCHAR2(100) NOT NULL ,
-    description NVARCHAR2(1000),
-    quantite NUMBER(10,2) NOT NULL ,
-    PU NUMBER(10,2) DEFAULT  0 NOT NULL ,
-    total NUMBER(10,2) DEFAULT  0 NOT NULL 
-);
-
-ALTER TABLE detaildevis ADD FOREIGN KEY(iddevis) REFERENCES devis(iddevis);
-ALTER TABLE detaildevis ADD FOREIGN KEY(idarticle) REFERENCES article(idarticle);
-
-CREATE TABLE proforma(
-    idproforma VARCHAR(50) PRIMARY KEY,
-    iddevis VARCHAR2(50) NOT NULL,
-    datevalidation TIMESTAMP DEFAULT current_timestamp,
-    FOREIGN KEY(iddevis) REFERENCES devis(iddevis)
-);
-
-
-CREATE TABLE boncommande(
-    idboncommande VARCHAR2(100) NOT NULL PRIMARY KEY,
-    idproforma VARCHAR2(50) NOT NULL,
-    dateboncommande TIMESTAMP DEFAULT  current_timestamp,
-    statut number DEFAULT  0
-);
-
-ALTER TABLE boncommande ADD FOREIGN KEY (idproforma) REFERENCES proforma(idproforma);
-
-
-CREATE TABLE bonlivraison(
-    idbonlivraison VARCHAR2(100) NOT NULL  PRIMARY KEY,
-    idboncommande VARCHAR2(100) NOT NULL ,
-    datebonlivraison TIMESTAMP DEFAULT  current_timestamp,
-    statut number DEFAULT  0
-);
-
-ALTER TABLE bonlivraison ADD FOREIGN KEY(idboncommande) REFERENCES boncommande(idboncommande);
-
 CREATE TABLE depot(
     iddepot VARCHAR2(50) PRIMARY KEY NOT NULL , 
     depot varchar(100) NOT NULL 
@@ -126,8 +74,8 @@ CREATE TABLE natureMouvement(
 -- ENTREE SORTIE PHYSIQUE
 CREATE TABLE detailmouvementphysique(
    iddetailmouvementphysique VARCHAR2(50) PRIMARY KEY NOT NULL,
-    typeMouvement number NOT NULL , /*ENTREE OU SORTIE (1,-1)*/
-    idnatureMouvement VARCHAR2(50) NOT NULL ,
+   typeMouvement number NOT NULL , /*ENTREE OU SORTIE (1,-1)*/
+   idnatureMouvement VARCHAR2(50) NOT NULL ,
    datedepot TIMESTAMP DEFAULT current_timestamp,
    idarticle VARCHAR2(50) NOT NULL,
    quantite NUMBER(10,2)  DEFAULT 0,
@@ -179,27 +127,79 @@ ALTER TABLE detailmouvementfictif ADD FOREIGN KEY(idmateriel) REFERENCES materie
 ALTER TABLE detailmouvementfictif ADD FOREIGN KEY(iddepot) REFERENCES depot(iddepot);
 
 
+
+CREATE TABLE devis(
+    iddevis VARCHAR2(50) PRIMARY KEY NOT NULL ,
+    iddetailmouvementphysique VARCHAR2(50) NOT NULL,
+    idclient varchar2(100) NOT NULL , 
+    datedevis TIMESTAMP DEFAULT current_timestamp,
+    statut number DEFAULT  0,
+    libelle NVARCHAR2(1000)
+);
+
+ALTER TABLE devis ADD FOREIGN KEY (idclient) REFERENCES client(idclient);
+ALTER TABLE devis ADD FOREIGN KEY(iddetailmouvementphysique) REFERENCES detailmouvementphysique(iddetailmouvementphysique);
+
+CREATE TABLE detaildevis(
+    iddetaildevis VARCHAR(50) PRIMARY KEY,
+    iddevis VARCHAR2(100) NOT NULL ,
+    idarticle VARCHAR2(100) NOT NULL ,
+    description NVARCHAR2(1000),
+    quantite NUMBER(10,2) NOT NULL ,
+    PU NUMBER(10,2) DEFAULT  0 NOT NULL ,
+    total NUMBER(10,2) DEFAULT  0 NOT NULL 
+);
+
+ALTER TABLE detaildevis ADD FOREIGN KEY(iddevis) REFERENCES devis(iddevis);
+ALTER TABLE detaildevis ADD FOREIGN KEY(idarticle) REFERENCES article(idarticle);
+
+CREATE TABLE proforma(
+    idproforma VARCHAR(50) PRIMARY KEY,
+    iddevis VARCHAR2(50) NOT NULL,
+    datevalidation TIMESTAMP DEFAULT current_timestamp,
+    FOREIGN KEY(iddevis) REFERENCES devis(iddevis)
+);
+
+
+CREATE TABLE boncommande(
+    idboncommande VARCHAR2(100) NOT NULL PRIMARY KEY,
+    idproforma VARCHAR2(50) NOT NULL,
+    dateboncommande TIMESTAMP DEFAULT  current_timestamp,
+    statut number DEFAULT  0
+);
+
+ALTER TABLE boncommande ADD FOREIGN KEY (idproforma) REFERENCES proforma(idproforma);
+
+
+CREATE TABLE bonlivraison(
+    idbonlivraison VARCHAR2(100) NOT NULL  PRIMARY KEY,
+    idboncommande VARCHAR2(100) NOT NULL ,
+    datebonlivraison TIMESTAMP DEFAULT  current_timestamp,
+    statut number DEFAULT  0
+);
+
+ALTER TABLE bonlivraison ADD FOREIGN KEY(idboncommande) REFERENCES boncommande(idboncommande);
+
+
 CREATE TABLE facturemateriel(
     idfacturemateriel VARCHAR2(50) PRIMARY KEY NOT NULL ,
     dateFacture TIMESTAMP DEFAULT  current_timestamp,
     idclient varchar2(100) NOT NULL , 
-    idmouvement VARCHAR2(100) NOT NULL ,
+    iddetailmouvementphysique VARCHAR2(50) NOT NULL,
     statut number DEFAULT  0
 );
 
-ALTER TABLE facturemateriel ADD FOREIGN KEY(idmouvement) REFERENCES mouvementStock(idmouvementStock);
+ALTER TABLE facturemateriel ADD FOREIGN KEY(iddetailmouvementphysique) REFERENCES detailmouvementphysique(iddetailmouvementphysique);
 ALTER TABLE facturemateriel ADD FOREIGN KEY(idclient) REFERENCES client(idclient);
 
 
 CREATE TABLE paiement(
     id VARCHAR2(50) PRIMARY KEY NOT NULL ,
-    idclient varchar2(100) NOT NULL ,
     idfacturemateriel varchar2(100) NOT NULL ,
     idmodepaiement varchar(100) NOT NULL ,
     datepaiement timestamp DEFAULT  current_timestamp
 );
 
-ALTER TABLE paiement ADD FOREIGN KEY(idclient) REFERENCES client(idclient);
 ALTER TABLE paiement ADD FOREIGN KEY(idfacturemateriel) REFERENCES facturemateriel(idfacturemateriel);
 ALTER TABLE paiement ADD FOREIGN KEY(idmodepaiement) REFERENCES modepaiement(id);
 
