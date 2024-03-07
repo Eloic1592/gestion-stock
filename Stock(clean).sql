@@ -89,7 +89,7 @@ CREATE TABLE detailmouvementphysique(
    total NUMBER(15,2)  DEFAULT 0,
    iddepot VARCHAR2(50) NOT NULL,
    description NVARCHAR2(1000),
-   commentaire NVARCHAR2(1000) NOT NULL, 
+   commentaire NVARCHAR2(1000), 
    statut NUMBER DEFAULT 0
 );
 
