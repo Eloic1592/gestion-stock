@@ -37,19 +37,21 @@ ALTER TABLE typeMateriel ADD FOREIGN KEY (idcategorieMateriel) REFERENCES catego
 CREATE TABLE article(
     idarticle VARCHAR2(50) PRIMARY KEY NOT NULL ,
     marque NVARCHAR2(100),
-    modele NVARCHAR2(1000) DEFAULT 'Modele non precise',
-    description NVARCHAR2(1000) DEFAULT 'Aucune description',
+    modele NVARCHAR2(1000),
+    description NVARCHAR2(1000),
     idtypeMateriel VARCHAR2(100) NOT NULL
 );
 
+ALTER TABLE article MODIFY modele NVARCHAR2(1000) DEFAULT 'Modele non precise';
+ALTER TABLE article MODIFY description NVARCHAR2(1000) DEFAULT 'Aucune description';
 ALTER TABLE article ADD FOREIGN KEY (idtypeMateriel) REFERENCES typeMateriel(idtypeMateriel);
 
 CREATE TABLE materiel(
     idmateriel VARCHAR2(50) PRIMARY KEY NOT NULL,
     marque NVARCHAR2(100),
-    modele NVARCHAR2(1000) DEFAULT 'Modele non precise',
-    numSerie VARCHAR2(100) NOT NULL,
-    description NVARCHAR2(1000) DEFAULT 'Aucune description',
+    modele NVARCHAR2(1000),
+    numSerie VARCHAR2(100),
+    description NVARCHAR2(1000) NOT NULL,
     prixVente NUMBER(15,2) DEFAULT 0,
     caution NUMBER(15,2) DEFAULT 0,
     couleur VARCHAR2(100) NOT NULL,
@@ -57,6 +59,9 @@ CREATE TABLE materiel(
     statut NUMBER DEFAULT 0,
     signature VARCHAR2(10) DEFAULT 'ITU'
 );
+
+ALTER TABLE materiel MODIFY modele NVARCHAR2(1000) DEFAULT 'Modele non precise';
+ALTER TABLE materiel MODIFY description NVARCHAR2(1000) DEFAULT 'Aucune description';
 ALTER TABLE materiel ADD FOREIGN KEY (idtypeMateriel) REFERENCES typeMateriel(idtypeMateriel);
 
 
@@ -83,12 +88,14 @@ CREATE TABLE detailmouvementphysique(
    PU NUMBER(15,2)  DEFAULT 0,
    total NUMBER(15,2)  DEFAULT 0,
    iddepot VARCHAR2(50) NOT NULL,
-   description NVARCHAR2(1000) DEFAULT 'Aucune description',
-   commentaire NVARCHAR2(1000) DEFAULT 'Aucun commentaire',
+   description NVARCHAR2(1000),
+   commentaire NVARCHAR2(1000) NOT NULL, 
    statut NUMBER DEFAULT 0
 );
 
 
+ALTER TABLE detailmouvementphysique MODIFY commentaire NVARCHAR2(1000) DEFAULT 'Aucun commentaire';
+ALTER TABLE detailmouvementphysique MODIFY description NVARCHAR2(1000) DEFAULT 'Aucune description';
 ALTER TABLE detailmouvementphysique ADD FOREIGN KEY(idarticle) REFERENCES article(idarticle);
 ALTER TABLE detailmouvementphysique ADD FOREIGN KEY(iddepot) REFERENCES depot(iddepot);
 ALTER TABLE detailmouvementphysique ADD FOREIGN KEY(idnatureMouvement) REFERENCES natureMouvement(idnatureMouvement);
@@ -117,11 +124,13 @@ CREATE TABLE detailmouvementfictif(
     caution NUMBER(15,2) DEFAULT  0,
     idmateriel varchar2(50) NOT NULL ,
     iddepot varchar(50) NOT NULL,
-    description NVARCHAR2(1000) DEFAULT 'Aucune description',
-    commentaire NVARCHAR2(1000)DEFAULT 'Aucun commentaire',
+    description NVARCHAR2(1000),
+    commentaire NVARCHAR2(1000),
     statut number DEFAULT  0
 );
 
+ALTER TABLE detailmouvementfictif MODIFY commentaire NVARCHAR2(1000) DEFAULT 'Aucun commentaire';
+ALTER TABLE detailmouvementfictif MODIFY description NVARCHAR2(1000) DEFAULT 'Aucune description';
 ALTER TABLE detailmouvementfictif ADD FOREIGN KEY(idmouvement) REFERENCES mouvementStock(idmouvementStock);
 ALTER TABLE detailmouvementfictif ADD FOREIGN KEY(idmateriel) REFERENCES materiel(idmateriel);
 ALTER TABLE detailmouvementfictif ADD FOREIGN KEY(iddepot) REFERENCES depot(iddepot);
@@ -144,12 +153,13 @@ CREATE TABLE detaildevis(
     iddetaildevis VARCHAR(50) PRIMARY KEY,
     iddevis VARCHAR2(100) NOT NULL ,
     idarticle VARCHAR2(100) NOT NULL ,
-    description NVARCHAR2(1000)  DEFAULT 'Aucune description',
+    description NVARCHAR2(1000),
     quantite NUMBER(15,2) DEFAULT  0 NOT NULL ,
     PU NUMBER(15,2) DEFAULT  0 NOT NULL ,
     total NUMBER(15,2) DEFAULT  0 NOT NULL 
 );
 
+ALTER TABLE detaildevis MODIFY description NVARCHAR2(1000) DEFAULT 'Aucune description';
 ALTER TABLE detaildevis ADD FOREIGN KEY(iddevis) REFERENCES devis(iddevis);
 ALTER TABLE detaildevis ADD FOREIGN KEY(idarticle) REFERENCES article(idarticle);
 
@@ -274,3 +284,8 @@ DELETE FROM typeMateriel;
 
 -- Supprimer les données de la table categorieMateriel
 DELETE FROM categorieMateriel;
+
+
+
+SELECT COLUMN_NAME, DATA_DEFAULT FROM USER_TAB_COLUMNS WHERE TABLE_NAME = 'ARTICLE';
+
