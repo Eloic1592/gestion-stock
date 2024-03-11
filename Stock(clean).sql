@@ -37,8 +37,8 @@ ALTER TABLE typeMateriel ADD FOREIGN KEY (idcategorieMateriel) REFERENCES catego
 CREATE TABLE article(
     idarticle VARCHAR2(50) PRIMARY KEY NOT NULL ,
     marque NVARCHAR2(100),
-    modele NVARCHAR2(1000),
-    description NVARCHAR2(1000),
+    modele VARCHAR2(1000),
+    description VARCHAR2(1000),
     idtypeMateriel VARCHAR2(100) NOT NULL
 );
 
@@ -51,7 +51,7 @@ CREATE TABLE materiel(
     marque NVARCHAR2(100),
     modele NVARCHAR2(1000),
     numSerie VARCHAR2(100),
-    description NVARCHAR2(1000) NOT NULL,
+    description VARCHAR2(1000),
     prixVente NUMBER(15,2) DEFAULT 0,
     caution NUMBER(15,2) DEFAULT 0,
     couleur VARCHAR2(100) NOT NULL,
