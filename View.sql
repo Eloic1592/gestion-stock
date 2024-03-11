@@ -94,6 +94,7 @@ SELECT
                                  'SORTIE'
         END as MOUVEMENT,
         N.IDNATUREMOUVEMENT,
+        N.TYPEMOUVEMENT,
         N.NATUREMOUVEMENT,
         E.ID as IDETUDIANT,
         E.NOM,
