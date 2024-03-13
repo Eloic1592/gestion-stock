@@ -41,6 +41,7 @@ SELECT
     m.COULEUR,
     m.CAUTION,
     m.SIGNATURE,
+    m.STATUT AS ETAT,
     CASE 
     STATUT
         WHEN 0 THEN 'LIBRE'
