@@ -152,7 +152,7 @@ from  DETAILMOUVEMENTFICTIF dmf
 drop view client_facture;
 Create or replace view client_facture as
 select fm.IDFACTUREMATERIEL,
-       fm.IDMOUVEMENT,
+       fm.IDDETAILMOUVEMENTPHYSIQUE,
        fm.DATEFACTURE,
        c.NOM,
        c.TELEPHONE,
@@ -162,7 +162,7 @@ select fm.IDFACTUREMATERIEL,
        c.QUITTANCE,
        fm.STATUT
 from FACTUREMATERIEL fm
-         join client c on fm.IDCLIENT = c.IDCLIENT;
+         join client c on fm.IDCLIENT = c.IDCLIENT ORDER BY fm.DATEFACTURE DESC;
 
 
 drop view detail_facture;
