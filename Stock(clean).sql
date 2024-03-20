@@ -54,10 +54,9 @@ CREATE TABLE materiel(
     description VARCHAR2(1000),
     prixVente NUMBER(15,2) DEFAULT 0,
     caution NUMBER(15,2) DEFAULT 0,
-    couleur VARCHAR2(100) NOT NULL,
     idtypeMateriel VARCHAR2(100) NOT NULL,
     statut NUMBER DEFAULT 0,
-    signature VARCHAR2(10) DEFAULT 'ITU'
+    signature NVARCHAR2(500) DEFAULT 'ITU'
 );
 
 ALTER TABLE materiel MODIFY modele NVARCHAR2(1000) DEFAULT 'Modele non precise';
