@@ -123,12 +123,14 @@ Create or replace view mouvement_fictif as
 select dmf.IDDETAILMOUVEMENTFICTIF,
        ms.IDMOUVEMENTSTOCK,
        ms.DATEDEPOT,
+       ms.TYPEMOUVEMENT,
        case ms.TYPEMOUVEMENT WHEN 1 THEN
                                  'ENTREE'
                              WHEN -1 THEN
                                  'SORTIE'
            END as MOUVEMENT,
        nm.NATUREMOUVEMENT,
+       nm.IDNATUREMOUVEMENT,
        m.MARQUE,
        m.MODELE,
        m.NUMSERIE,
@@ -426,7 +428,7 @@ GROUP BY
     d.depot;
     
 
--- Cycle des mouvements
+-- Cycle des mouvements des articles
 Create OR REPLACE VIEW cycle_mouvement as 
 WITH DateMinMax AS (
     SELECT 
@@ -462,6 +464,51 @@ CROSS JOIN
     NATUREMOUVEMENT nm
 LEFT JOIN 
     mouvement_physique mp ON EXTRACT(MONTH FROM mp.DATEDEPOT) = AllMonths.mois 
+                            AND EXTRACT(YEAR FROM mp.DATEDEPOT) = AllMonths.annee 
+                            AND nm.IDNATUREMOUVEMENT = mp.IDNATUREMOUVEMENT
+GROUP BY 
+    AllMonths.annee, AllMonths.mois, AllMonths.mois_nom, nm.IDNATUREMOUVEMENT, nm.NATUREMOUVEMENT
+ORDER BY 
+    AllMonths.annee, AllMonths.mois, nm.IDNATUREMOUVEMENT;
+
+
+
+-- Cycle des mouvements des materiels
+Create OR REPLACE VIEW cycle_mouvement_materiel as 
+WITH DateMinMax AS (
+    SELECT 
+        TO_CHAR(MIN(DATEDEPOT), 'YYYY') AS min_year,
+        TO_CHAR(MAX(DATEDEPOT), 'YYYY') AS max_year
+    FROM mouvement_physique
+),
+AllYears AS (
+    SELECT 
+        TO_CHAR(ADD_MONTHS(TO_DATE('01-01-' || min_year), 12 * (LEVEL - 1)), 'YYYY') AS annee
+    FROM DateMinMax
+    CONNECT BY LEVEL <= CEIL(MONTHS_BETWEEN(TO_DATE(max_year, 'YYYY'), TO_DATE(min_year, 'YYYY')) / 12) + 1
+),
+AllMonths AS (
+    SELECT 
+        TO_CHAR(ADD_MONTHS(TO_DATE('01-01-' || 2024), LEVEL - 1), 'MM') AS mois,
+        TO_CHAR(ADD_MONTHS(TO_DATE('01-01-' || 2024), LEVEL - 1), 'MONTH') AS mois_nom,
+        annee
+    FROM AllYears
+    CONNECT BY LEVEL <= 12
+)
+SELECT 
+    AllMonths.annee,
+    AllMonths.mois,
+    AllMonths.mois_nom,
+    TO_CHAR(NVL(SUM(CASE WHEN mp.TYPEMOUVEMENT = -1 THEN count(mp.IDDETAILMOUVEMENTFICTIF) ELSE 0 END), 0), '9999999999999') AS sortie,
+    TO_CHAR(NVL(SUM(CASE WHEN mp.TYPEMOUVEMENT = 1 THEN count(mp.IDDETAILMOUVEMENTFICTIF) ELSE 0 END), 0), '9999999999999') AS entree,
+    nm.IDNATUREMOUVEMENT,
+    nm.NATUREMOUVEMENT
+FROM 
+    AllMonths
+CROSS JOIN 
+    NATUREMOUVEMENT nm
+LEFT JOIN 
+    mouvement_fictif mp ON EXTRACT(MONTH FROM mp.DATEDEPOT) = AllMonths.mois 
                             AND EXTRACT(YEAR FROM mp.DATEDEPOT) = AllMonths.annee 
                             AND nm.IDNATUREMOUVEMENT = mp.IDNATUREMOUVEMENT
 GROUP BY 
