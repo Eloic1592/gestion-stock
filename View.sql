@@ -309,7 +309,7 @@ SELECT
     la.TYPEMATERIEL,
     EXTRACT(MONTH FROM d.date_day) AS mois,
     EXTRACT(YEAR FROM d.date_day) AS annee,
-    COALESCE(SUM(CASE WHEN dm.TYPEMOUVEMENT = 1 THEN dm.quantite ELSE -dm.quantite END), 0) AS quantite
+    COALESCE(SUM(quantite), 0) AS quantite
 FROM 
     liste_article la
 CROSS JOIN 
