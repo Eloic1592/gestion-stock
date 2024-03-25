@@ -292,10 +292,42 @@ FROM BONLIVRAISON L join BONCOMMANDE B on b.IDBONCOMMANDE=l.IDBONCOMMANDE  join 
 
 -- Stock par article
 CREATE OR REPLACE VIEW stock_article as 
-select coalesce(sum(quantite),0) as quantite,la.idarticle,la.marque,la.modele,la.description,la.IDTYPEMATERIEL,la.TYPEMATERIEL
-from detailmouvementphysique dm  right join liste_article la on la.idarticle=dm.idarticle  group by la.idarticle,la.marque,la.modele,la.description,la.IDTYPEMATERIEL,la.TYPEMATERIEL;
+WITH dates AS (
+    SELECT 
+        TRUNC(SYSDATE, 'YYYY') + LEVEL - 1 AS date_day
+    FROM 
+        dual
+    CONNECT BY 
+        LEVEL <= ADD_MONTHS(TRUNC(SYSDATE, 'YYYY'), 12) - TRUNC(SYSDATE, 'YYYY')
+)
+SELECT 
+    la.idarticle,
+    la.marque,
+    la.modele,
+    la.description,
+    la.IDTYPEMATERIEL,
+    la.TYPEMATERIEL,
+    EXTRACT(MONTH FROM d.date_day) AS mois,
+    EXTRACT(YEAR FROM d.date_day) AS annee,
+    COALESCE(SUM(CASE WHEN dm.TYPEMOUVEMENT = 1 THEN dm.quantite ELSE -dm.quantite END), 0) AS quantite
+FROM 
+    liste_article la
+CROSS JOIN 
+    dates d
+LEFT JOIN 
+    detailmouvementphysique dm ON la.idarticle = dm.idarticle AND dm.DATEDEPOT = d.date_day
+GROUP BY 
+    la.idarticle,
+    la.marque,
+    la.modele,
+    la.description,
+    la.IDTYPEMATERIEL,
+    la.TYPEMATERIEL,
+    EXTRACT(MONTH FROM d.date_day),
+    EXTRACT(YEAR FROM d.date_day);
 
-
+-- select coalesce(sum(quantite),0) as quantite,la.idarticle,la.marque,la.modele,la.description,la.IDTYPEMATERIEL,la.TYPEMATERIEL
+-- from detailmouvementphysique dm  right join liste_article la on la.idarticle=dm.idarticle  group by la.idarticle,la.marque,la.modele,la.description,la.IDTYPEMATERIEL,la.TYPEMATERIEL;
 
 -- Total des articles par depot
 CREATE OR REPLACE VIEW stock_article_depot as 
