@@ -308,6 +308,7 @@ SELECT
     la.IDTYPEMATERIEL,
     la.TYPEMATERIEL,
     EXTRACT(MONTH FROM d.date_day) AS mois,
+    TO_CHAR(d.date_day, 'Month') AS mois_nom,
     EXTRACT(YEAR FROM d.date_day) AS annee,
     COALESCE(SUM(quantite), 0) AS quantite
 FROM 
@@ -323,6 +324,7 @@ GROUP BY
     la.description,
     la.IDTYPEMATERIEL,
     la.TYPEMATERIEL,
+    TO_CHAR(d.date_day, 'Month'),
     EXTRACT(MONTH FROM d.date_day),
     EXTRACT(YEAR FROM d.date_day);
 
