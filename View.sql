@@ -506,6 +506,37 @@ ORDER BY
     AllMonths.annee, AllMonths.mois, nm.IDNATUREMOUVEMENT;
 
 
+-- Statistiques type materiel
+CREATE OR REPLACE VIEW stat_typemateriel AS
+WITH AllMonths AS (
+    SELECT TO_DATE('2024-01-01', 'YYYY-MM-DD') + LEVEL - 1 AS MonthStart
+    FROM dual
+    CONNECT BY LEVEL <= 12
+)
+SELECT 
+    TO_CHAR(AllMonths.MonthStart, 'YYYY-MM') AS mois,
+    tm.TYPEMATERIEL,
+    nm.NATUREMOUVEMENT,
+    nm.IDNATUREMOUVEMENT,
+    SUM(CASE WHEN mp.TYPEMOUVEMENT = 1 THEN mp.TOTAL ELSE 0 END) AS DEPENSE,
+    SUM(CASE WHEN mp.TYPEMOUVEMENT = -1 THEN mp.TOTAL ELSE 0 END) AS GAIN
+FROM 
+    AllMonths
+CROSS JOIN 
+    TYPEMATERIEL tm
+CROSS JOIN 
+    NATUREMOUVEMENT nm
+LEFT JOIN 
+    mouvement_physique mp ON EXTRACT(MONTH FROM mp.DATEDEPOT) = EXTRACT(MONTH FROM AllMonths.MonthStart)
+                            AND EXTRACT(YEAR FROM mp.DATEDEPOT) = EXTRACT(YEAR FROM AllMonths.MonthStart)
+                            AND nm.IDNATUREMOUVEMENT = mp.IDNATUREMOUVEMENT
+                            AND tm.IDTYPEMATERIEL = (SELECT IDTYPEMATERIEL FROM liste_article WHERE IDARTICLE = mp.IDARTICLE)
+GROUP BY 
+    TO_CHAR(AllMonths.MonthStart, 'YYYY-MM'), tm.TYPEMATERIEL, nm.NATUREMOUVEMENT, nm.IDNATUREMOUVEMENT
+ORDER BY 
+    mois, tm.TYPEMATERIEL, nm.NATUREMOUVEMENT, nm.IDNATUREMOUVEMENT;
+
+
 
 -- Cycle des mouvements des materiels
 
