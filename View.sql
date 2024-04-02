@@ -509,12 +509,12 @@ ORDER BY
 -- Statistiques type materiel
 CREATE OR REPLACE VIEW stat_typemateriel AS
 WITH AllMonths AS (
-    SELECT TO_DATE('2024-01-01', 'YYYY-MM-DD') + LEVEL - 1 AS MonthStart
+    SELECT TO_DATE(TO_CHAR(SYSDATE, 'YYYY') || '-01-01', 'YYYY-MM-DD') + LEVEL - 1 AS MonthStart
     FROM dual
     CONNECT BY LEVEL <= 12
 )
 SELECT 
-    TO_CHAR(AllMonths.MonthStart, 'YYYY-MM') AS mois,
+    TO_CHAR(AllMonths.MonthStart, 'Month') AS mois,
     tm.TYPEMATERIEL,
     nm.NATUREMOUVEMENT,
     nm.IDNATUREMOUVEMENT,
@@ -532,9 +532,10 @@ LEFT JOIN
                             AND nm.IDNATUREMOUVEMENT = mp.IDNATUREMOUVEMENT
                             AND tm.IDTYPEMATERIEL = (SELECT IDTYPEMATERIEL FROM liste_article WHERE IDARTICLE = mp.IDARTICLE)
 GROUP BY 
-    TO_CHAR(AllMonths.MonthStart, 'YYYY-MM'), tm.TYPEMATERIEL, nm.NATUREMOUVEMENT, nm.IDNATUREMOUVEMENT
+    TO_CHAR(AllMonths.MonthStart, 'Month'), tm.TYPEMATERIEL, nm.NATUREMOUVEMENT, nm.IDNATUREMOUVEMENT
 ORDER BY 
     mois, tm.TYPEMATERIEL, nm.NATUREMOUVEMENT, nm.IDNATUREMOUVEMENT;
+
 
 
 
