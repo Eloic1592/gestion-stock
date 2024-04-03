@@ -1,5 +1,3 @@
--- Vue materiel
-
 drop view liste_article;
 CREATE or REPLACE VIEW liste_article AS
 SELECT 
@@ -566,10 +564,266 @@ GROUP BY
 ORDER BY 
     mois, tm.TYPEMATERIEL, nm.NATUREMOUVEMENT;
 
+-- Calcul du temps de rupture chaque article en mouvement de chaqe uarticle
+CREATE OR REPLACE  view temps_rupture_stock_article as
+WITH stock_movements AS (
+    SELECT 
+        idarticle,
+        datedepot,
+        typeMouvement,
+        quantite as stock_change
+    FROM 
+        detailmouvementphysique
+),    
+stock_levels AS (
+    SELECT 
+        idarticle,
+        datedepot,
+        SUM(stock_change) OVER (PARTITION BY idarticle ORDER BY datedepot) AS stock_level
+    FROM 
+        stock_movements
+),
+sales AS (
+    SELECT 
+        idarticle,
+        datedepot AS sale_date
+    FROM 
+        stock_movements
+    WHERE 
+        typeMouvement = -1
+),
+stock_sales AS (
+    SELECT 
+        s.idarticle,
+        s.sale_date,
+        MAX(l.datedepot) AS last_entry_date
+    FROM 
+        sales s
+    JOIN 
+        stock_levels l ON s.idarticle = l.idarticle AND l.stock_level > 0
+    GROUP BY 
+        s.idarticle, s.sale_date
+)
+SELECT 
+    la.IDARTICLE,
+    la.IDTYPEMATERIEL,
+    la.TYPEMATERIEL,
+    la.MARQUE,
+    la.MODELE,
+    la.DESCRIPTION,
+    AVG(EXTRACT(DAY FROM (ss.sale_date - ss.last_entry_date))) as moyenne_jour,
+FROM 
+    liste_article la
+LEFT JOIN 
+    stock_sales ss ON la.IDARTICLE = ss.idarticle
+GROUP BY 
+    la.IDARTICLE, la.IDTYPEMATERIEL, la.TYPEMATERIEL, la.MARQUE, la.MODELE, la.DESCRIPTION;
 
 
 
--- Cycle des mouvements des materiels
+
+
+-- Calcul du taux de rupture de stock de chaque article
+CREATE OR REPLACE  view taux_rupture_article as
+WITH CTE_Rupture AS (
+    SELECT 
+        dm.IDARTICLE,
+        a.MARQUE,
+        a.MODELE,
+        dm.DATEDEPOT AS debut_rupture,
+        LEAD(dm.DATEDEPOT) OVER (PARTITION BY dm.IDARTICLE ORDER BY dm.DATEDEPOT) - INTERVAL '1' DAY AS fin_rupture
+    FROM 
+        detailmouvementphysique dm
+    JOIN 
+        article a ON dm.IDARTICLE = a.IDARTICLE
+    WHERE 
+        dm.QUANTITE <= 0
+),
+CTE_Duree AS (
+    SELECT 
+        IDARTICLE,
+        MARQUE,
+        MODELE,
+        COUNT(*) AS jours_rupture
+    FROM 
+        CTE_Rupture
+    GROUP BY 
+        IDARTICLE, MARQUE, MODELE
+),
+CTE_Total AS (
+    SELECT 
+        dm.IDARTICLE,
+        a.MARQUE,
+        a.MODELE,
+        COUNT(*) AS jours_total
+    FROM 
+        detailmouvementphysique dm
+    JOIN 
+        article a ON dm.IDARTICLE = a.IDARTICLE
+    GROUP BY 
+        dm.IDARTICLE, a.MARQUE, a.MODELE
+)
+SELECT 
+    la.IDARTICLE,
+    la.MARQUE,
+    la.MODELE,
+    la.DESCRIPTION,
+    COALESCE(ROUND((r.jours_rupture / t.jours_total) * 100, 2), 0) AS Taux_Rupture_Stock
+FROM 
+    liste_article la
+LEFT JOIN 
+    CTE_Duree r ON la.IDARTICLE = r.IDARTICLE AND la.MARQUE = r.MARQUE AND la.MODELE = r.MODELE
+LEFT JOIN 
+    CTE_Total t ON la.IDARTICLE = t.IDARTICLE AND la.MARQUE = t.MARQUE AND la.MODELE = t.MODELE;
+
+
+
+
+
+-- Rotation de stock
+-- Atao amin'ity rotation de stock ny LIFO sy FIFO 
+CREATE OR REPLACE  view rotation_stock as
+WITH stock_movements AS (
+    SELECT 
+        idarticle,
+        datedepot,
+        typeMouvement,
+        quantite as stock_change
+    FROM 
+        detailmouvementphysique
+),    
+stock_levels AS (
+    SELECT 
+        idarticle,
+        datedepot,
+        SUM(stock_change) OVER (PARTITION BY idarticle ORDER BY datedepot) AS stock_level
+    FROM 
+        stock_movements
+),
+sales AS (
+    SELECT 
+        idarticle,
+        datedepot AS sale_date,
+        SUM(stock_change) AS total_sales -- Calculer le nombre total de ventes pour chaque article
+    FROM 
+        stock_movements
+    WHERE 
+        typeMouvement = -1
+    GROUP BY 
+        idarticle, datedepot
+),
+stock_sales AS (
+    SELECT 
+        s.idarticle,
+        s.sale_date,
+        MAX(l.datedepot) AS last_entry_date,
+        s.total_sales -- Inclure le nombre total de ventes dans la sous-requête
+    FROM 
+        sales s
+    JOIN 
+        stock_levels l ON s.idarticle = l.idarticle AND l.stock_level > 0
+    GROUP BY 
+        s.idarticle, s.sale_date, s.total_sales
+)
+SELECT 
+    la.IDARTICLE,
+    la.IDTYPEMATERIEL,
+    la.TYPEMATERIEL,
+    la.MARQUE,
+    la.MODELE,
+    la.DESCRIPTION,
+    AVG(EXTRACT(DAY FROM (ss.sale_date - ss.last_entry_date))) as moyenne_jour,
+    SUM(ss.total_sales) / AVG(EXTRACT(DAY FROM (ss.sale_date - ss.last_entry_date))) as rotation_stock -- Calculer la rotation de stock
+FROM 
+    liste_article la
+LEFT JOIN 
+    stock_sales ss ON la.IDARTICLE = ss.idarticle
+GROUP BY 
+    la.IDARTICLE, la.IDTYPEMATERIEL, la.TYPEMATERIEL, la.MARQUE, la.MODELE, la.DESCRIPTION;
+
+
+
+-- Exemple de requête pour calculer le coût des articles vendus en utilisant FIFO
+CREATE OR REPLACE VIEW v_FIFO AS
+SELECT 
+    m.IDARTICLE,
+    m.MARQUE,
+    m.MODELE,
+    m.DESCRIPTION,
+    EXTRACT(YEAR FROM d.datedepot) AS Annee,
+    EXTRACT(MONTH FROM d.datedepot) AS Mois,
+    TO_CHAR(d.datedepot, 'Month') AS Nom_Mois,
+    COALESCE(SUM(CASE WHEN d.typeMouvement = 1 THEN d.quantite ELSE 0 END), 0) AS total_achetes,
+    COALESCE(SUM(CASE WHEN d.typeMouvement = -1 THEN d.quantite ELSE 0 END), 0) AS total_vendus,
+    COALESCE(SUM(CASE WHEN d.typeMouvement = 1 THEN d.quantite * d.PU ELSE 0 END), 0) AS total_achetes_valeur,
+    COALESCE(SUM(CASE WHEN d.typeMouvement = -1 THEN d.quantite * d.PU ELSE 0 END), 0) AS total_vendus_valeur,
+    COALESCE(SUM(d.quantite), 0) AS quantite_stock
+FROM 
+    liste_article m
+LEFT JOIN 
+    detailmouvementphysique d ON m.IDARTICLE = d.idarticle
+GROUP BY 
+    m.IDARTICLE,
+    m.MARQUE,
+    m.MODELE,
+    m.DESCRIPTION,
+    EXTRACT(YEAR FROM d.datedepot),
+    EXTRACT(MONTH FROM d.datedepot),
+    TO_CHAR(d.datedepot, 'Month');
+
+-- Exemple de requête pour calculer le coût des articles vendus en utilisant LIFO
+CREATE OR REPLACE VIEW v_LIFO AS
+WITH achats AS (
+    SELECT 
+        idarticle,
+        datedepot,
+        quantite,
+        PU,
+        ROW_NUMBER() OVER (PARTITION BY idarticle ORDER BY datedepot DESC) AS rn
+    FROM 
+        detailmouvementphysique
+    WHERE 
+        typeMouvement = 1
+),
+vendus AS (
+    SELECT 
+        a.idarticle,
+        a.quantite,
+        a.PU,
+        a.datedepot,
+        ROW_NUMBER() OVER (PARTITION BY a.idarticle ORDER BY a.datedepot DESC) AS rn
+    FROM 
+        achats a
+    WHERE 
+        a.rn <= (SELECT SUM(d.quantite) FROM detailmouvementphysique d WHERE d.typeMouvement = -1 AND d.idarticle = a.idarticle AND TRUNC(d.datedepot, 'MM') = TRUNC(a.datedepot, 'MM'))
+)
+SELECT 
+    m.IDARTICLE,
+    m.MARQUE,
+    m.MODELE,
+    m.DESCRIPTION,
+    EXTRACT(YEAR FROM v.datedepot) AS Annee,
+    EXTRACT(MONTH FROM v.datedepot) AS Mois,
+    TO_CHAR(v.datedepot, 'Month') AS Nom_Mois,
+    COALESCE(SUM(v.quantite * v.PU), 0) AS cout_vendu
+FROM 
+    liste_article m
+LEFT JOIN 
+    vendus v ON m.IDARTICLE = v.idarticle
+GROUP BY 
+    m.IDARTICLE,
+    m.MARQUE,
+    m.MODELE,
+    m.DESCRIPTION,
+    EXTRACT(YEAR FROM v.datedepot),
+    EXTRACT(MONTH FROM v.datedepot),
+    TO_CHAR(v.datedepot, 'Month');
+
+
+
+
+
+
 
 DROP VIEW liste_article;
 DROP VIEW liste_typemateriel;
@@ -592,7 +846,15 @@ DROP VIEW stock_materiel;
 DROP VIEW stock_article_depot;
 DROP VIEW stock_typemateriel_depot;
 DROP VIEW stat_naturemouvement;
-DROP VIEW liste_nature; 
+DROP VIEW liste_nature;
+DROP VIEW utilisation_materiel;
+DROP VIEW cycle_mouvement;
+DROP VIEW stat_typemateriel;
+DROP VIEW temps_rupture_stock_article;
+DROP VIEW taux_rupture_article;
+DROP VIEW rotation_stock;
+DROP VIEW v_FIFO;
+DROP VIEW v_LIFO;
 
 
 
