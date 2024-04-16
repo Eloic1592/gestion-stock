@@ -353,10 +353,22 @@ GROUP BY tp.idtypemateriel, tp.typemateriel,d.iddepot,d.depot;
 
 -- Total des articles en entree et en sortie
 CREATE OR REPLACE view total_article_entree as 
-select coalesce(sum(mp.quantite),0) as quantite,la.idarticle,la.marque FROM detailmouvementphysique mp right join liste_article la on mp.idarticle=la.idarticle where mp.TYPEMOUVEMENT=1 group by la.idarticle,la.marque;
+select coalesce(sum(mp.quantite),0) as total FROM detailmouvementphysique mp where typeMouvement=1;
+
+
 
 CREATE OR REPLACE view total_article_sortie as 
-select coalesce(sum(mp.quantite),0) as quantite,la.idarticle,la.marque FROM detailmouvementphysique mp right join liste_article la on mp.idarticle=la.idarticle where mp.TYPEMOUVEMENT=-1 group by la.idarticle,la.marque;
+select coalesce(sum(mp.quantite),0) as total FROM detailmouvementphysique mp where typeMouvement=-1;
+
+
+CREATE OR REPLACE view total_article_mouvement AS
+select coalesce(sum(mp.quantite),0) as total,n.idnatureMouvement,n.natureMouvement from detailmouvementphysique mp right join naturemouvement n on mp.idnatureMouvement=n.idnatureMouvement where mp.typeMouvement=1 group by n.idnatureMouvement,n.naturemouvement;
+
+
+CREATE OR REPLACE view total_materiel AS
+select count(*) from liste_materiel;
+
+
 
 
 
