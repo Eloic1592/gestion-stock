@@ -387,7 +387,7 @@ AllYears AS (
 ),
 AllMonths AS (
     SELECT 
-        TO_CHAR(ADD_MONTHS(TO_DATE('01-01-' || annee), LEVEL - 1), 'MM') AS mois,
+        CAST(TO_CHAR(ADD_MONTHS(TO_DATE('01-01-' || annee), LEVEL - 1), 'MM') AS INT) AS mois,
         TO_CHAR(ADD_MONTHS(TO_DATE('01-01-' || annee), LEVEL - 1), 'MONTH') AS mois_nom,
         annee
     FROM AllYears
