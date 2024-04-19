@@ -397,9 +397,9 @@ SELECT
     AllMonths.annee,
     AllMonths.mois,
     AllMonths.mois_nom,
-    TO_CHAR(NVL(SUM(CASE WHEN mp.TYPEMOUVEMENT = -1 THEN mp.total ELSE 0 END), 0), '9999999999999') AS gain,
-    TO_CHAR(NVL(SUM(CASE WHEN mp.TYPEMOUVEMENT = 1 THEN mp.total ELSE 0 END), 0), '9999999999999') AS depense,
-    TO_CHAR(NVL(SUM(mp.total), 0), '9999999999999') AS benefice,
+    NVL(SUM(CASE WHEN mp.TYPEMOUVEMENT = -1 THEN mp.total ELSE 0 END), 0) AS gain,
+    NVL(SUM(CASE WHEN mp.TYPEMOUVEMENT = 1 THEN mp.total ELSE 0 END), 0) AS depense,
+    NVL(SUM(mp.total), 0) AS benefice,
         nm.IDNATUREMOUVEMENT,
     nm.NATUREMOUVEMENT
 FROM 
@@ -576,7 +576,7 @@ GROUP BY
 ORDER BY 
     mois, tm.TYPEMATERIEL, nm.NATUREMOUVEMENT;
 
--- Calcul du temps de rupture chaque article en mouvement de chaqe uarticle
+-- Calcul du temps de rupture chaque article en mouvement de chaque un article
 CREATE OR REPLACE  view temps_rupture_stock_article as
 WITH stock_movements AS (
     SELECT 
