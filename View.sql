@@ -521,60 +521,43 @@ ORDER BY
 -- Statistiques type materiel
 CREATE OR REPLACE VIEW stat_typemateriel AS
 WITH AllMonths AS (
-    SELECT TO_DATE(TO_CHAR(SYSDATE, 'YYYY') || '-01-01', 'YYYY-MM-DD') + LEVEL - 1 AS MonthStart
+    SELECT TO_CHAR(TO_DATE('2024-01-01', 'YYYY-MM-DD') + INTERVAL '1' MONTH * (LEVEL - 1), 'YYYY-MM') AS MonthStart
     FROM dual
-    CONNECT BY LEVEL <= 12
+    CONNECT BY TO_DATE('2024-01-01', 'YYYY-MM-DD') + INTERVAL '1' MONTH * (LEVEL - 1) <= TRUNC(SYSDATE, 'MM')
 )
 SELECT 
-    TO_CHAR(AllMonths.MonthStart, 'Month') AS mois,
-    tm.TYPEMATERIEL,
-    nm.NATUREMOUVEMENT,
-    nm.IDNATUREMOUVEMENT,
-    SUM(CASE WHEN mp.TYPEMOUVEMENT = 1 THEN mp.TOTAL ELSE 0 END) AS DEPENSE,
-    SUM(CASE WHEN mp.TYPEMOUVEMENT = -1 THEN mp.TOTAL ELSE 0 END) AS GAIN
+    EXTRACT(YEAR FROM TO_DATE(AllMonths.MonthStart, 'YYYY-MM')) AS annee,
+    EXTRACT(MONTH FROM TO_DATE(AllMonths.MonthStart, 'YYYY-MM')) AS mois_numero,
+    TO_CHAR(TO_DATE(AllMonths.MonthStart, 'YYYY-MM'), 'Month') AS mois,
+    nm.idnatureMouvement,
+    nm.natureMouvement,
+    a.idtypeMateriel,
+    tm.typeMateriel,
+    COALESCE(SUM(CASE WHEN dmp.typeMouvement = 1 THEN dmp.total ELSE 0 END), 0) AS depense,
+    COALESCE(SUM(CASE WHEN dmp.typeMouvement = -1 THEN dmp.total ELSE 0 END), 0) AS gain
 FROM 
     AllMonths
 CROSS JOIN 
-    TYPEMATERIEL tm
+    natureMouvement nm
 CROSS JOIN 
-    NATUREMOUVEMENT nm
+    article a
 LEFT JOIN 
-    mouvement_physique mp ON EXTRACT(MONTH FROM mp.DATEDEPOT) = EXTRACT(MONTH FROM AllMonths.MonthStart)
-                            AND EXTRACT(YEAR FROM mp.DATEDEPOT) = EXTRACT(YEAR FROM AllMonths.MonthStart)
-                            AND nm.IDNATUREMOUVEMENT = mp.IDNATUREMOUVEMENT
-                            AND tm.IDTYPEMATERIEL = (SELECT IDTYPEMATERIEL FROM liste_article WHERE IDARTICLE = mp.IDARTICLE)
+    detailmouvementphysique dmp ON TO_CHAR(dmp.datedepot, 'YYYY-MM') = AllMonths.MonthStart
+                            AND nm.idnatureMouvement = dmp.idnatureMouvement
+                            AND a.idarticle = dmp.idarticle
+LEFT JOIN 
+    typeMateriel tm ON a.idtypeMateriel = tm.idtypeMateriel
 GROUP BY 
-    TO_CHAR(AllMonths.MonthStart, 'Month'), tm.TYPEMATERIEL, nm.NATUREMOUVEMENT, nm.IDNATUREMOUVEMENT
+    EXTRACT(YEAR FROM TO_DATE(AllMonths.MonthStart, 'YYYY-MM')),
+    EXTRACT(MONTH FROM TO_DATE(AllMonths.MonthStart, 'YYYY-MM')),
+    TO_CHAR(TO_DATE(AllMonths.MonthStart, 'YYYY-MM'), 'Month'),
+    nm.idnatureMouvement,
+    a.idtypeMateriel,
+    tm.typeMateriel
 ORDER BY 
-    mois, tm.TYPEMATERIEL, nm.NATUREMOUVEMENT, nm.IDNATUREMOUVEMENT;
+    annee, mois_numero, nm.idnatureMouvement,nm.natureMouvement, a.idtypeMateriel;
 
-WITH AllMonths AS (
-    SELECT TO_DATE(TO_CHAR(SYSDATE, 'YYYY') || '-01-01', 'YYYY-MM-DD') + LEVEL - 1 AS MonthStart
-    FROM dual
-    CONNECT BY LEVEL <= 12
-)
-SELECT 
-    TO_CHAR(AllMonths.MonthStart, 'Month') AS mois,
-    tm.TYPEMATERIEL,
-    nm.NATUREMOUVEMENT,
-    COALESCE(SUM(CASE WHEN mp.TYPEMOUVEMENT = 1 THEN mp.TOTAL ELSE 0 END), 0) AS DEPENSE,
-    COALESCE(SUM(CASE WHEN mp.TYPEMOUVEMENT = -1 THEN mp.TOTAL ELSE 0 END), 0) AS GAIN
-FROM 
-    AllMonths
-CROSS JOIN 
-    TYPEMATERIEL tm
-CROSS JOIN 
-    NATUREMOUVEMENT nm
-LEFT JOIN 
-    mouvement_physique mp ON EXTRACT(MONTH FROM mp.DATEDEPOT) = EXTRACT(MONTH FROM AllMonths.MonthStart)
-                            AND EXTRACT(YEAR FROM mp.DATEDEPOT) = EXTRACT(YEAR FROM AllMonths.MonthStart)
-                            AND nm.IDNATUREMOUVEMENT = mp.IDNATUREMOUVEMENT
-LEFT JOIN 
-    article a ON a.IDARTICLE = mp.IDARTICLE AND tm.IDTYPEMATERIEL = a.IDTYPEMATERIEL
-GROUP BY 
-    TO_CHAR(AllMonths.MonthStart, 'Month'), tm.TYPEMATERIEL, nm.NATUREMOUVEMENT
-ORDER BY 
-    mois, tm.TYPEMATERIEL, nm.NATUREMOUVEMENT;
+    
 
 -- Calcul du temps de rupture chaque article en mouvement de chaque un article
 CREATE OR REPLACE  view temps_rupture_stock_article as
