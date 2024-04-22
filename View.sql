@@ -356,26 +356,31 @@ CREATE OR REPLACE view total_article_entree as
 SELECT 
     EXTRACT(YEAR FROM datedepot) AS annee,
     EXTRACT(MONTH FROM datedepot) AS mois,
+    TO_CHAR(datedepot, 'Month') AS nom_mois,
     SUM(CASE WHEN typeMouvement = 1 THEN quantite ELSE 0 END) AS total
 FROM 
     detailmouvementphysique
 GROUP BY 
     EXTRACT(YEAR FROM datedepot),
-    EXTRACT(MONTH FROM datedepot)
+    EXTRACT(MONTH FROM datedepot),
+    TO_CHAR(datedepot, 'Month')
 ORDER BY 
     annee, mois;
+
 
 
 CREATE OR REPLACE view total_article_sortie as 
 SELECT 
     EXTRACT(YEAR FROM datedepot) AS annee,
     EXTRACT(MONTH FROM datedepot) AS mois,
+    TO_CHAR(datedepot, 'Month') AS nom_mois,
     SUM(CASE WHEN typeMouvement = -1 THEN quantite ELSE 0 END) AS total
 FROM 
     detailmouvementphysique
 GROUP BY 
     EXTRACT(YEAR FROM datedepot),
-    EXTRACT(MONTH FROM datedepot)
+    EXTRACT(MONTH FROM datedepot),
+    TO_CHAR(datedepot, 'Month')
 ORDER BY 
     annee, mois;
 
