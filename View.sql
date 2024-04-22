@@ -353,12 +353,32 @@ GROUP BY tp.idtypemateriel, tp.typemateriel,d.iddepot,d.depot;
 
 -- Total des articles en entree et en sortie
 CREATE OR REPLACE view total_article_entree as 
-select coalesce(sum(mp.quantite),0) as total FROM detailmouvementphysique mp where typeMouvement=1;
-
+SELECT 
+    EXTRACT(YEAR FROM datedepot) AS annee,
+    EXTRACT(MONTH FROM datedepot) AS mois,
+    SUM(CASE WHEN typeMouvement = 1 THEN quantite ELSE 0 END) AS total
+FROM 
+    detailmouvementphysique
+GROUP BY 
+    EXTRACT(YEAR FROM datedepot),
+    EXTRACT(MONTH FROM datedepot)
+ORDER BY 
+    annee, mois;
 
 
 CREATE OR REPLACE view total_article_sortie as 
-select coalesce(sum(mp.quantite),0) as total FROM detailmouvementphysique mp where typeMouvement=-1;
+SELECT 
+    EXTRACT(YEAR FROM datedepot) AS annee,
+    EXTRACT(MONTH FROM datedepot) AS mois,
+    SUM(CASE WHEN typeMouvement = -1 THEN quantite ELSE 0 END) AS total
+FROM 
+    detailmouvementphysique
+GROUP BY 
+    EXTRACT(YEAR FROM datedepot),
+    EXTRACT(MONTH FROM datedepot)
+ORDER BY 
+    annee, mois;
+
 
 
 CREATE OR REPLACE view total_article_mouvement AS
@@ -557,7 +577,7 @@ GROUP BY
 ORDER BY 
     annee, mois_numero, nm.idnatureMouvement,nm.natureMouvement, a.idtypeMateriel;
 
-    
+
 
 -- Calcul du temps de rupture chaque article en mouvement de chaque un article
 CREATE OR REPLACE  view temps_rupture_stock_article as
