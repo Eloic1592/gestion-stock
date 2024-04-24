@@ -701,7 +701,7 @@ LEFT JOIN
 
 
 
--- Rotation de stock
+-- Rotation de stock par mois/annee (Quantite et monetaires)
 -- Atao amin'ity rotation de stock ny LIFO sy FIFO 
 CREATE OR REPLACE  view rotation_stock as
 WITH stock_movements AS (
