@@ -414,7 +414,7 @@ AllMonths AS (
     SELECT 
         CAST(TO_CHAR(ADD_MONTHS(TO_DATE('01-01-' || annee), LEVEL - 1), 'MM') AS INT) AS mois,
         TO_CHAR(ADD_MONTHS(TO_DATE('01-01-' || annee), LEVEL - 1), 'MONTH') AS mois_nom,
-        annee
+        CAST(annee AS INT) AS annee
     FROM AllYears
     CONNECT BY LEVEL <= 12
 )
@@ -425,7 +425,7 @@ SELECT
     NVL(SUM(CASE WHEN mp.TYPEMOUVEMENT = -1 THEN mp.total ELSE 0 END), 0) AS gain,
     NVL(SUM(CASE WHEN mp.TYPEMOUVEMENT = 1 THEN mp.total ELSE 0 END), 0) AS depense,
     NVL(SUM(mp.total), 0) AS benefice,
-        nm.IDNATUREMOUVEMENT,
+    nm.IDNATUREMOUVEMENT,
     nm.NATUREMOUVEMENT
 FROM 
     AllMonths
@@ -439,6 +439,7 @@ GROUP BY
     AllMonths.annee, AllMonths.mois, AllMonths.mois_nom, nm.IDNATUREMOUVEMENT, nm.NATUREMOUVEMENT
 ORDER BY 
     AllMonths.annee, AllMonths.mois, nm.IDNATUREMOUVEMENT;
+
 
 -- Chiffre d'affaires par jour
 -- Depart
