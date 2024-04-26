@@ -2,8 +2,9 @@ CREATE OR REPLACE VIEW vue_stock_initial_debut_mois AS
 SELECT 
     EXTRACT(YEAR FROM dm.datedepot) AS annee,
     EXTRACT(MONTH FROM dm.datedepot) AS mois,
-    coalesce(SUM(quantite),0) AS stockinitial,
-    coalesce(SUM(total),0) AS prixinitial
+    TO_CHAR(dm.datedepot, 'Month') AS nom_mois,
+    COALESCE(SUM(quantite), 0) AS stockinitial,
+    COALESCE(SUM(total), 0) AS prixinitial
 FROM 
     detailmouvementphysique dm
 WHERE
@@ -16,8 +17,8 @@ WHERE
     )
 GROUP BY 
     EXTRACT(YEAR FROM dm.datedepot),
-    EXTRACT(MONTH FROM dm.datedepot);
-
+    EXTRACT(MONTH FROM dm.datedepot),
+    TO_CHAR(dm.datedepot, 'Month');
 
 
 
@@ -25,8 +26,9 @@ CREATE OR REPLACE VIEW vue_stock_final_fin_mois AS
 SELECT 
     EXTRACT(YEAR FROM dm.datedepot) AS annee,
     EXTRACT(MONTH FROM dm.datedepot) AS mois,
-    coalesce(SUM(quantite),0) AS stockfinal,
-    coalesce(SUM(total),0) AS prixfinal
+    TO_CHAR(dm.datedepot, 'Month') AS nom_mois,
+    COALESCE(SUM(quantite), 0) AS stockfinal,
+    COALESCE(SUM(total), 0) AS prixfinal
 FROM 
     detailmouvementphysique dm
 WHERE
@@ -39,7 +41,9 @@ WHERE
     )
 GROUP BY 
     EXTRACT(YEAR FROM dm.datedepot),
-    EXTRACT(MONTH FROM dm.datedepot);
+    EXTRACT(MONTH FROM dm.datedepot),
+    TO_CHAR(dm.datedepot, 'Month');
+
 
 
 

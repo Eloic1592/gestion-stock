@@ -703,64 +703,7 @@ LEFT JOIN
 
 -- Rotation de stock par mois/annee (Quantite et monetaires)
 -- Atao amin'ity rotation de stock ny LIFO sy FIFO 
-CREATE OR REPLACE  view rotation_stock as
-WITH stock_movements AS (
-    SELECT 
-        idarticle,
-        datedepot,
-        typeMouvement,
-        quantite as stock_change
-    FROM 
-        detailmouvementphysique
-),    
-stock_levels AS (
-    SELECT 
-        idarticle,
-        datedepot,
-        SUM(stock_change) OVER (PARTITION BY idarticle ORDER BY datedepot) AS stock_level
-    FROM 
-        stock_movements
-),
-sales AS (
-    SELECT 
-        idarticle,
-        datedepot AS sale_date,
-        SUM(stock_change) AS total_sales -- Calculer le nombre total de ventes pour chaque article
-    FROM 
-        stock_movements
-    WHERE 
-        typeMouvement = -1
-    GROUP BY 
-        idarticle, datedepot
-),
-stock_sales AS (
-    SELECT 
-        s.idarticle,
-        s.sale_date,
-        MAX(l.datedepot) AS last_entry_date,
-        s.total_sales -- Inclure le nombre total de ventes dans la sous-requête
-    FROM 
-        sales s
-    JOIN 
-        stock_levels l ON s.idarticle = l.idarticle AND l.stock_level > 0
-    GROUP BY 
-        s.idarticle, s.sale_date, s.total_sales
-)
-SELECT 
-    la.IDARTICLE,
-    la.IDTYPEMATERIEL,
-    la.TYPEMATERIEL,
-    la.MARQUE,
-    la.MODELE,
-    la.DESCRIPTION,
-    AVG(EXTRACT(DAY FROM (ss.sale_date - ss.last_entry_date))) as moyenne_jour,
-    SUM(ss.total_sales) / AVG(EXTRACT(DAY FROM (ss.sale_date - ss.last_entry_date))) as rotation_stock -- Calculer la rotation de stock
-FROM 
-    liste_article la
-LEFT JOIN 
-    stock_sales ss ON la.IDARTICLE = ss.idarticle
-GROUP BY 
-    la.IDARTICLE, la.IDTYPEMATERIEL, la.TYPEMATERIEL, la.MARQUE, la.MODELE, la.DESCRIPTION;
+
 
 
 
@@ -839,9 +782,6 @@ GROUP BY
     EXTRACT(YEAR FROM v.datedepot),
     EXTRACT(MONTH FROM v.datedepot),
     TO_CHAR(v.datedepot, 'Month');
-
-
-
 
 
 
