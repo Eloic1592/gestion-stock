@@ -501,7 +501,7 @@ GROUP BY
     
 
 -- Cycle des mouvements des articles
-Create OR REPLACE VIEW cycle_mouvement as 
+CREATE OR REPLACE VIEW cycle_mouvement AS 
 WITH DateMinMax AS (
     SELECT 
         TO_CHAR(MIN(DATEDEPOT), 'YYYY') AS min_year,
@@ -510,13 +510,13 @@ WITH DateMinMax AS (
 ),
 AllYears AS (
     SELECT 
-        TO_CHAR(ADD_MONTHS(TO_DATE('01-01-' || min_year), 12 * (LEVEL - 1)), 'YYYY') AS annee
+        TO_NUMBER(TO_CHAR(ADD_MONTHS(TO_DATE('01-01-' || min_year), 12 * (LEVEL - 1)), 'YYYY')) AS annee
     FROM DateMinMax
     CONNECT BY LEVEL <= CEIL(MONTHS_BETWEEN(TO_DATE(max_year, 'YYYY'), TO_DATE(min_year, 'YYYY')) / 12) + 1
 ),
 AllMonths AS (
     SELECT 
-        TO_CHAR(ADD_MONTHS(TO_DATE('01-01-' || annee), LEVEL - 1), 'MM') AS mois,
+        TO_NUMBER(TO_CHAR(ADD_MONTHS(TO_DATE('01-01-' || annee), LEVEL - 1), 'MM')) AS mois,
         TO_CHAR(ADD_MONTHS(TO_DATE('01-01-' || annee), LEVEL - 1), 'MONTH') AS mois_nom,
         annee
     FROM AllYears
@@ -542,6 +542,7 @@ GROUP BY
     AllMonths.annee, AllMonths.mois, AllMonths.mois_nom, nm.IDNATUREMOUVEMENT, nm.NATUREMOUVEMENT
 ORDER BY 
     AllMonths.annee, AllMonths.mois, nm.IDNATUREMOUVEMENT;
+
 
 
 -- Statistiques type materiel
@@ -703,8 +704,6 @@ LEFT JOIN
 
 -- Rotation de stock par mois/annee (Quantite et monetaires)
 -- Atao amin'ity rotation de stock ny LIFO sy FIFO 
-
-
 
 
 -- Exemple de requête pour calculer le coût des articles vendus en utilisant FIFO
