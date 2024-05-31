@@ -130,6 +130,14 @@ BEGIN
  return retour;
 END;
 
+CREATE OR REPLACE FUNCTION getseqemplacement
+ RETURN NUMBER IS
+ retour NUMBER;
+BEGIN
+ SELECT SEQEMPLACEMENT.nextval INTO retour FROM dual;
+ return retour;
+END;
+
 
 -- CREATE OR REPLACE FUNCTION getseqcommande
 --  RETURN NUMBER IS

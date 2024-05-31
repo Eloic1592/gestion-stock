@@ -17,8 +17,10 @@ CREATE or REPLACE VIEW liste_typemateriel AS
 SELECT 
     t.IDTYPEMATERIEL,
     t.TYPEMATERIEL,
+    t.VAL,
     c.IDCATEGORIEMATERIEL,
-    c.CATEGORIEMATERIEL
+    c.CATEGORIEMATERIEL,
+    c.val as codecat
 FROM 
     TYPEMATERIEL T
 JOIN 
@@ -48,6 +50,20 @@ FROM
     materiel m
 JOIN 
     TYPEMATERIEL tm ON m.IDTYPEMATERIEL = tm.IDTYPEMATERIEL;
+
+drop view liste_emplacement;
+CREATE or REPLACE VIEW liste_emplacement AS
+SELECT 
+    t.idemplacement,
+    d.depot,
+    d.iddepot,
+    d.codedep,
+    t.codeemp,
+    t.capacite 
+FROM 
+    EMPLACEMENT T
+JOIN 
+    depot d ON T.iddepot = d.iddepot;
 
 
 drop view mouvement_physique;

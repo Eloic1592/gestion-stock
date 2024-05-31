@@ -16,18 +16,20 @@ CREATE SEQUENCE SEQDETAILMOUVEMENTFICTIF START WITH 1 INCREMENT BY 1;
 CREATE SEQUENCE SEQFACTUREMATERIEL START WITH 1 INCREMENT BY 1;
 CREATE SEQUENCE SEQDETAILSFACTUREMATERIEL START WITH 1 INCREMENT BY 1;
 CREATE SEQUENCE SEQPAIEMENT START WITH 1 INCREMENT BY 1;
-
+CREATE SEQUENCE SEQEMPLACEMENT START WITH 1 INCREMENT BY 1;
 
 -- Type materiel bureautique ou materiel informatique ou autre
 CREATE TABLE categorieMateriel(
-    idcategorieMateriel VARCHAR2(100) PRIMARY KEY NOT NULL ,
-    categorieMateriel VARCHAR2(100) NOT NULL 
+    idcategorieMateriel VARCHAR2(100) PRIMARY KEY NOT NULL,
+    categorieMateriel VARCHAR2(100),
+    val VARCHAR2(50)
 );
 
 -- Ordinateur,chargeur,clavier,lampe,...
 CREATE TABLE typeMateriel(
     idtypeMateriel VARCHAR2(100) PRIMARY KEY NOT NULL ,
-    typeMateriel VARCHAR2(100) NOT NULL,
+    typeMateriel VARCHAR2(100),
+    val VARCHAR2(50),
     idcategorieMateriel VARCHAR2(100) NOT NULL
 );
 
@@ -52,7 +54,7 @@ CREATE TABLE materiel(
     modele NVARCHAR2(1000),
     numSerie VARCHAR2(100),
     description VARCHAR2(1000),
-    prixVente NUMBER(15,2) DEFAULT 0,
+    prixvente NUMBER(15,2) DEFAULT 0,
     caution NUMBER(15,2) DEFAULT 0,
     idtypeMateriel VARCHAR2(100) NOT NULL,
     statut NUMBER DEFAULT 0,
@@ -66,8 +68,20 @@ ALTER TABLE materiel ADD FOREIGN KEY (idtypeMateriel) REFERENCES typeMateriel(id
 
 CREATE TABLE depot(
     iddepot VARCHAR2(50) PRIMARY KEY NOT NULL , 
-    depot varchar(100) NOT NULL 
+    depot varchar(100) NOT NULL,
+    codedep VARCHAR2(50),
+    capacite NUMBER(15,2) DEFAULT 0
 );
+
+-- Emplacement dans un depot
+CREATE TABLE emplacement(
+    idemplacement varchar(50) PRIMARY KEY NOT NULL,
+    iddepot VARCHAR2(100) NOT NULL,
+    codeemp VARCHAR2(100),
+    capacite NUMBER(15,2) DEFAULT 0
+);
+
+ALTER TABLE emplacement ADD FOREIGN KEY(iddepot) REFERENCES depot(iddepot);
 
 
 CREATE TABLE natureMouvement(
