@@ -112,7 +112,7 @@ SELECT
         dc.total
 FROM detailcommande dc 
 join commande cd on dc.idcommande=cd.idcommande 
-join article a on dc.idarticle=a.idarticle; 
+join article a on dc.idarticle=a.idarticle ; 
 
 
 -- Reception des commandes
@@ -124,7 +124,7 @@ SELECT
     r.statut,
     r.idcommande
 FROM reception r 
-left join commande cd on r.idcommande=cd.idcommande; 
+join commande cd on r.idcommande=cd.idcommande order by r.datereception desc; 
 
 -- Stockage des commandes
 drop view vue_stockage;
@@ -138,7 +138,7 @@ SELECT
     a.modele,
     s.statut
 FROM stockage s
-join article a on s.idarticle=a.idarticle; 
+join article a on s.idarticle=a.idarticle order by  s.datestockage desc; 
 
 
 -- Distribution
@@ -156,7 +156,7 @@ SELECT
     d.statut
 FROM distribution d
 join article a on d.idarticle=a.idarticle 
-join depot de on de.iddepot=d.iddepot ;  
+join depot de on de.iddepot=d.iddepot order by d.datedistribution desc;  
 
 -- Inventaire
 drop view vue_inventaire;
@@ -171,7 +171,7 @@ SELECT
     a.modele,
     i.statut
 FROM inventaire i
-join article a on i.idarticle=a.idarticle;
+join article a on i.idarticle=a.idarticle order by i.dateinventaire desc;
 
 
 drop view mouvement_physique;
