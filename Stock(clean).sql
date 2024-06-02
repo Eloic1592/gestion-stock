@@ -47,6 +47,7 @@ CREATE TABLE article(
     quantitestock NUMBER(15,2) DEFAULT 0
 );
 
+ALTER TABLE article ADD codearticle varchar2(255);
 ALTER TABLE article MODIFY modele NVARCHAR2(1000) DEFAULT 'Modele non precise';
 ALTER TABLE article MODIFY description NVARCHAR2(1000) DEFAULT 'Aucune description';
 ALTER TABLE article ADD FOREIGN KEY (idtypeMateriel) REFERENCES typeMateriel(idtypeMateriel);
@@ -249,30 +250,32 @@ ALTER TABLE paiement ADD FOREIGN KEY(idfacturemateriel) REFERENCES facturemateri
 ALTER TABLE paiement ADD FOREIGN KEY(idmodepaiement) REFERENCES modepaiement(id);
 
 
--- Drop table
-DROP TABLE paiement;
-DROP TABLE facturemateriel;
-DROP TABLE bonlivraison;
-DROP TABLE boncommande;
-DROP TABLE proforma;
-DROP TABLE detaildevis;
-DROP TABLE devis;
-DROP TABLE detailmouvementfictif;
-DROP TABLE detailmouvementphysique;
-DROP TABLE mouvementStock;
-DROP TABLE natureMouvement;
-DROP TABLE emplacement;
-DROP TABLE depot;
-DROP TABLE materiel;
-DROP TABLE article;
-DROP TABLE typeMateriel;
-DROP TABLE categorieMateriel;
+-- Supprimer les tables avec les contraintes les plus profondes en premier
+DROP TABLE paiement CASCADE CONSTRAINTS;
+DROP TABLE detailmouvementfictif CASCADE CONSTRAINTS;
+DROP TABLE mouvementStock CASCADE CONSTRAINTS;
+DROP TABLE detailmouvementphysique CASCADE CONSTRAINTS;
+DROP TABLE inventaire CASCADE CONSTRAINTS;
+DROP TABLE distribution CASCADE CONSTRAINTS;
+DROP TABLE stockage CASCADE CONSTRAINTS;
+DROP TABLE reception CASCADE CONSTRAINTS;
+DROP TABLE detailcommande CASCADE CONSTRAINTS;
+DROP TABLE Commande CASCADE CONSTRAINTS;
+DROP TABLE emplacement CASCADE CONSTRAINTS;
+DROP TABLE depot CASCADE CONSTRAINTS;
+DROP TABLE materiel CASCADE CONSTRAINTS;
+DROP TABLE article CASCADE CONSTRAINTS;
+DROP TABLE typeMateriel CASCADE CONSTRAINTS;
+DROP TABLE categorieMateriel CASCADE CONSTRAINTS;
+DROP TABLE natureMouvement CASCADE CONSTRAINTS;
+
 
 -- Alter
 ALTER TABLE naturemouvement 
 ADD typeMouvement Integer ;
 
 
+-- Delete
 DELETE FROM paiement;
 
 DELETE FROM facturemateriel;

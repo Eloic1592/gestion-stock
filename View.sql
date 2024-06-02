@@ -8,6 +8,7 @@ SELECT
     m.MARQUE,
     m.MODELE,
     m.DESCRIPTION,
+    m.codearticle,
     m.prix,
     m.quantitestock
 FROM 
@@ -105,6 +106,7 @@ SELECT
         dc.idcommande,
         a.marque,
         a.modele,
+        a.codearticle,
         a.description as descarticle,
         dc.description,
         dc.quantite,
@@ -136,6 +138,7 @@ SELECT
     a.idarticle,
     a.marque,
     a.modele,
+    a.codearticle,
     s.statut
 FROM stockage s
 join article a on s.idarticle=a.idarticle order by  s.datestockage desc; 
@@ -151,6 +154,7 @@ SELECT
     a.idarticle,
     a.marque,
     a.modele,
+    a.codearticle,
     de.codedep,
     de.depot,
     d.statut
@@ -169,6 +173,7 @@ SELECT
     a.idarticle,
     a.marque,
     a.modele,
+    a.codearticle,
     i.statut
 FROM inventaire i
 join article a on i.idarticle=a.idarticle order by i.dateinventaire desc;
