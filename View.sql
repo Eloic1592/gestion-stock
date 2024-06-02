@@ -4,9 +4,12 @@ SELECT
     m.IDARTICLE,
     tm.IDTYPEMATERIEL,
     tm.TYPEMATERIEL,
+    tm.val,
     m.MARQUE,
     m.MODELE,
-    m.DESCRIPTION
+    m.DESCRIPTION,
+    m.prix,
+    m.quantitestock
 FROM 
     ARTICLE m
 JOIN 
@@ -59,11 +62,116 @@ SELECT
     d.iddepot,
     d.codedep,
     t.codeemp,
-    t.capacite 
+    t.capacite,
+    t.codebarre
 FROM 
     EMPLACEMENT T
 JOIN 
     depot d ON T.iddepot = d.iddepot;
+
+
+
+DROP VIEW liste_etudiant;
+CREATE OR REPLACE VIEW liste_etudiant AS
+SELECT
+    e.ID as IDETUDIANT,
+    e.NOM,
+    e.PRENOM,
+    e.MAIL,
+    s.VAL as SEXE
+FROM ETUDIANT e join SEXE s on e.SEXE=S.ID;
+
+
+-- Commande
+drop view client_commande;
+CREATE OR REPLACE view vue_commande as
+SELECT
+        CD.idcommande,
+        CD.datecommande,
+        CD.libelle,
+        CD.STATUT,
+        C.NOM,
+        C.NIF,
+        C.NUMSTAT,
+        C.ADRESSE,
+        C.TELEPHONE
+FROM COMMANDE  CD JOIN CLIENT C on CD.IDCLIENT=C.IDCLIENT order by CD.datecommande desc; 
+
+-- Detailcommande
+drop view detail_commande;
+CREATE OR REPLACE view detail_commande as
+SELECT
+        dc.iddetailcommande,
+        dc.idcommande,
+        a.marque,
+        a.modele,
+        a.description as descarticle,
+        dc.description,
+        dc.quantite,
+        dc.pu,
+        dc.total
+FROM detailcommande dc 
+join commande cd on dc.idcommande=cd.idcommande 
+join article a on dc.idarticle=a.idarticle; 
+
+
+-- Reception des commandes
+drop view vue_reception;
+CREATE OR REPLACE view vue_reception as
+SELECT
+    r.idreception,
+    r.datereception,
+    r.statut,
+    r.idcommande
+FROM reception r 
+left join commande cd on r.idcommande=cd.idcommande; 
+
+-- Stockage des commandes
+drop view vue_stockage;
+CREATE OR REPLACE view vue_stockage as
+SELECT
+    s.idstockage,
+    s.datestockage,
+    s.quantite,
+    a.idarticle,
+    a.marque,
+    a.modele,
+    s.statut
+FROM stockage s
+join article a on s.idarticle=a.idarticle; 
+
+
+-- Distribution
+drop view vue_distribution;
+CREATE OR REPLACE view vue_distribution as
+SELECT
+    d.iddistribution,
+    d.datedistribution,
+    d.quantite,
+    a.idarticle,
+    a.marque,
+    a.modele,
+    de.codedep,
+    de.depot,
+    d.statut
+FROM distribution d
+join article a on d.idarticle=a.idarticle 
+join depot de on de.iddepot=d.iddepot ;  
+
+-- Inventaire
+drop view vue_inventaire;
+CREATE OR REPLACE view vue_inventaire as
+SELECT
+    i.idinventaire,
+    i.dateinventaire,
+    i.quantitereel,
+    i.quantitetheorique,
+    a.idarticle,
+    a.marque,
+    a.modele,
+    i.statut
+FROM inventaire i
+join article a on i.idarticle=a.idarticle;
 
 
 drop view mouvement_physique;
@@ -120,18 +228,6 @@ SELECT
         MS.STATUT
 FROM MOUVEMENTSTOCK MS join NATUREMOUVEMENT N on ms.IDNATUREMOUVEMENT=N.IDNATUREMOUVEMENT join ETUDIANT E on E.ID=MS.IDETUDIANT ORDER BY MS.DATEDEPOT DESC;
 
-
-DROP VIEW liste_etudiant;
-CREATE OR REPLACE VIEW liste_etudiant AS
-SELECT
-    e.ID as IDETUDIANT,
-    e.NOM,
-    e.PRENOM,
-    e.MAIL,
-    s.VAL as SEXE
-FROM ETUDIANT e join SEXE s on e.SEXE=S.ID;
-
-
 drop view mouvement_fictif;
 Create or replace view mouvement_fictif as
 select dmf.IDDETAILMOUVEMENTFICTIF,
@@ -164,36 +260,6 @@ from  DETAILMOUVEMENTFICTIF dmf
           join NATUREMOUVEMENT nm on ms.IDNATUREMOUVEMENT = nm.IDNATUREMOUVEMENT ORDER BY ms.DATEDEPOT DESC;
 
 
--- Facture
-drop view client_facture;
-Create or replace view client_facture as
-select fm.IDFACTUREMATERIEL,
-       fm.IDDETAILMOUVEMENTPHYSIQUE,
-       fm.DATEFACTURE,
-       c.NOM,
-       c.TELEPHONE,
-       c.NIF,
-       c.NUMSTAT,
-       c.ADRESSE,
-       c.QUITTANCE,
-       fm.STATUT
-from FACTUREMATERIEL fm
-         join client c on fm.IDCLIENT = c.IDCLIENT ORDER BY fm.DATEFACTURE DESC;
-
-
-drop view detail_facture;
-Create or replace  view detail_facture  as
-select df.IDDETAILSFACTUREMATERIEL,
-       df.IDFACTUREMATERIEL,
-       df.IDARTICLE,
-       a.MARQUE,
-       a.MODELE,
-       df.PU,
-       df.QUANTITE,
-       df.TOTAL
-from DETAILSFACTUREMATERIEL df
-         join article a on df.IDARTICLE = a.IDARTICLE;
-
 -- Vue paiement
 drop view paiement_facture;
 Create or  REPLACE view  paiement_facture as
@@ -213,97 +279,6 @@ from PAIEMENT p
          join MODEPAIEMENT mp on p.IDMODEPAIEMENT = mp.ID;
 
 select * from paiement_facture;
-
-
-
--- Devis
-drop view client_devis;
-CREATE OR REPLACE view client_devis as
-SELECT
-        d.IDDEVIS,
-        c.NOM,
-        c.ADRESSE,
-        c.NUMSTAT,
-        c.NIF,
-        c.TELEPHONE,
-        d.LIBELLE,
-        d.DATEDEVIS
-     FROM  DEVIS D  join CLIENT c  on c.IDCLIENT=d.IDCLIENT LEFT OUTER JOIN  proforma p on d.iddevis=p.iddevis WHERE  p.IDDEVIS IS NULL;    
-
-Drop view detail_devis;
-Create or replace view detail_devis as
-select dv.IDDETAILDEVIS,
-       c.IDDEVIS,
-       a.MARQUE,
-       a.MODELE,
-        CASE 
-        WHEN dv.DESCRIPTION IS NULL OR dv.DESCRIPTION = '' THEN N'Aucune description'
-        ELSE dv.DESCRIPTION
-        END AS DESCRIPTION,
-       dv.QUANTITE,
-       dv.PU,
-       dv.TOTAL
-from DETAILDEVIS dv
-         join ARTICLE a on dv.IDARTICLE = a.IDARTICLE
-         join DEVIS c on dv.IDDEVIS = c.IDDEVIS;
-
-
--- Proforma
-drop view client_proforma;
-CREATE OR REPLACE view client_proforma as
-SELECT
-        p.IDPROFORMA,
-        d.IDDEVIS,
-        c.NOM,
-        c.ADRESSE,
-        c.NUMSTAT,
-        c.NIF,
-        c.TELEPHONE,
-        d.LIBELLE,
-        p.datevalidation
-     FROM PROFORMA P join devis D on p.IDDEVIS=d.IDDEVIS join CLIENT c  on c.IDCLIENT=d.IDCLIENT left outer join BONCOMMANDE b on  b.IDPROFORMA=P.IDPROFORMA WHERE  b.IDPROFORMA IS NULL;
-
-
-drop view detail_proforma;
-CREATE OR REPLACE view detail_proforma as
-SELECT
-    p.IDPROFORMA,
-    d.*
-FROM PROFORMA P join DETAIL_DEVIS D on p.IDDEVIS=d.IDDEVIS;
-
-
--- Commande
-drop view client_commande;
-CREATE OR REPLACE view client_commande as
-SELECT
-        b.IDBONCOMMANDE,
-        b.DATEBONCOMMANDE,
-        CP.IDPROFORMA,
-        C.NOM,
-        C.NIF,
-        C.NUMSTAT,
-        C.ADRESSE,
-        C.TELEPHONE,
-        CP.DATEVALIDATION
-FROM BONCOMMANDE B join PROFORMA CP on b.IDPROFORMA=CP.IDPROFORMA  join devis D on CP.IDDEVIS=d.IDDEVIS join CLIENT c  on c.IDCLIENT=d.IDCLIENT left outer join BONLIVRAISON l on b.IDBONCOMMANDE=l.IDBONCOMMANDE WHERE  l.IDBONCOMMANDE IS NULL;
-
-
--- Livraison
-drop view client_livraison;
-CREATE OR REPLACE view client_livraison as
-SELECT
-        l.IDBONLIVRAISON,
-        l.DATEBONLIVRAISON,
-        b.IDBONCOMMANDE,
-        CP.IDPROFORMA,
-        C.NOM,
-        C.NIF,
-        C.NUMSTAT,
-        C.ADRESSE,
-        C.TELEPHONE,
-        CP.DATEVALIDATION
-FROM BONLIVRAISON L join BONCOMMANDE B on b.IDBONCOMMANDE=l.IDBONCOMMANDE  join PROFORMA CP on b.IDPROFORMA=CP.IDPROFORMA  join devis D on CP.IDDEVIS=d.IDDEVIS join CLIENT c  on c.IDCLIENT=d.IDCLIENT;
-
 
 
 -- Stock par article

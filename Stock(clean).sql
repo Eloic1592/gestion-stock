@@ -2,11 +2,12 @@
 CREATE SEQUENCE SEQTYPEMATERIEL START WITH 1 INCREMENT BY 1;
 CREATE SEQUENCE SEQCATEGORIEMATERIEL START WITH 1 INCREMENT BY 1;
 CREATE SEQUENCE SEQARTICLE START WITH 1 INCREMENT BY 1;
-CREATE SEQUENCE SEQDEVIS START WITH 1 INCREMENT BY 1;
-CREATE SEQUENCE SEQPROFORMA START WITH 1 INCREMENT BY 1;
-CREATE SEQUENCE SEQDETAILDEVIS START WITH 1 INCREMENT BY 1;
-CREATE SEQUENCE SEQBONCOMMANDE START WITH 1 INCREMENT BY 1;
-CREATE SEQUENCE SEQBONLIVRAISON START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE SEQCOMMANDE START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE SEQDETAILBONCOMMANDE START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE SEQRECEPTION START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE SEQSTOCKAGE START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE SEQDISTRIBUTION START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE SEQINVENTAIRE START WITH 1 INCREMENT BY 1;
 CREATE SEQUENCE SEQMATERIEL START WITH 1 INCREMENT BY 1;
 CREATE SEQUENCE SEQDEPOT START WITH 1 INCREMENT BY 1;
 CREATE SEQUENCE SEQNATUREMOUVEMENT START WITH 1 INCREMENT BY 1;
@@ -41,7 +42,9 @@ CREATE TABLE article(
     marque NVARCHAR2(100),
     modele VARCHAR2(1000),
     description VARCHAR2(1000),
-    idtypeMateriel VARCHAR2(100) NOT NULL
+    idtypeMateriel VARCHAR2(100) NOT NULL,
+    prix NUMBER(15,2) DEFAULT 0,
+    quantitestock NUMBER(15,2) DEFAULT 0
 );
 
 ALTER TABLE article MODIFY modele NVARCHAR2(1000) DEFAULT 'Modele non precise';
@@ -72,6 +75,8 @@ CREATE TABLE depot(
     codedep VARCHAR2(50),
     capacite NUMBER(15,2) DEFAULT 0
 );
+ALTER TABLE depot ADD codebarre VARCHAR2(255);
+
 
 -- Emplacement dans un depot
 CREATE TABLE emplacement(
@@ -80,8 +85,91 @@ CREATE TABLE emplacement(
     codeemp VARCHAR2(100),
     capacite NUMBER(15,2) DEFAULT 0
 );
-
+ALTER TABLE emplacement ADD codebarre VARCHAR2(255);
 ALTER TABLE emplacement ADD FOREIGN KEY(iddepot) REFERENCES depot(iddepot);
+
+-- Commande
+CREATE TABLE Commande(
+    idcommande VARCHAR2(50) PRIMARY KEY NOT NULL ,
+    idclient varchar2(100) NOT NULL , 
+    libelle NVARCHAR2(1000),
+    datecommande TIMESTAMP DEFAULT current_timestamp,
+    statut number DEFAULT  0
+);
+
+ALTER TABLE Commande ADD FOREIGN KEY (idclient) REFERENCES client(idclient);
+
+
+CREATE TABLE detailcommande(
+    iddetailcommande VARCHAR(50) PRIMARY KEY,
+    idcommande VARCHAR2(100) NOT NULL,
+    idarticle VARCHAR2(100) NOT NULL ,
+    description NVARCHAR2(1000),
+    quantite NUMBER(15,2) DEFAULT  0,
+    PU NUMBER(15,2) DEFAULT  0,
+    total NUMBER(15,2) DEFAULT 0
+);
+
+ALTER TABLE detailcommande MODIFY description NVARCHAR2(1000) DEFAULT 'Aucune description';
+ALTER TABLE detailcommande ADD FOREIGN KEY(idcommande) REFERENCES Commande(idcommande);
+ALTER TABLE detailcommande ADD FOREIGN KEY(idarticle) REFERENCES article(idarticle);
+
+
+-- Reception
+CREATE TABLE reception(
+    idreception VARCHAR2(100) NOT NULL  PRIMARY KEY,
+    idcommande VARCHAR2(100) NOT NULL ,
+    datereception TIMESTAMP DEFAULT  current_timestamp,
+    statut number DEFAULT  0
+);
+
+ALTER TABLE reception ADD FOREIGN KEY(idcommande) REFERENCES Commande(idcommande);
+
+
+-- Stockage
+CREATE TABLE stockage(
+    idstockage VARCHAR2(100) NOT NULL  PRIMARY KEY,
+    idarticle VARCHAR2(100),
+    -- idmateriel varchar2(100),
+    quantite NUMBER(15,2) default 0,
+    datestockage TIMESTAMP DEFAULT  current_timestamp,
+    statut number DEFAULT  0
+);
+
+ALTER TABLE stockage ADD FOREIGN KEY(idarticle) REFERENCES article(idarticle);
+-- ALTER TABLE stockage ADD FOREIGN KEY(idmateriel) REFERENCES materiel(idmateriel);
+
+
+-- Repartition des articles 
+CREATE TABLE distribution(
+    iddistribution VARCHAR2(100) NOT NULL  PRIMARY KEY,
+    idarticle VARCHAR2(100),
+    -- idmateriel varchar2(100),
+    quantite NUMBER(15,2) default 0,
+    datedistribution TIMESTAMP DEFAULT  current_timestamp,
+    iddepot VARCHAR2(100),
+    statut number DEFAULT  0
+);
+
+ALTER TABLE distribution ADD FOREIGN KEY(iddepot) REFERENCES depot(iddepot);
+ALTER TABLE distribution ADD FOREIGN KEY(idarticle) REFERENCES article(idarticle);
+-- ALTER TABLE distribution ADD FOREIGN KEY(idmateriel) REFERENCES materiel(idmateriel);
+
+
+-- Inventaire
+CREATE TABLE inventaire(
+    idinventaire VARCHAR2(100) NOT NULL  PRIMARY KEY,
+    idarticle VARCHAR2(100),
+    -- idmateriel varchar2(100),
+    quantitereel NUMBER(15,2) default 0,
+    quantitetheorique NUMBER(15,2) default 0,
+    dateinventaire TIMESTAMP DEFAULT  current_timestamp,
+    statut number DEFAULT  0
+);
+
+ALTER TABLE inventaire ADD FOREIGN KEY(idarticle) REFERENCES article(idarticle);
+-- ALTER TABLE inventaire ADD FOREIGN KEY(idmateriel) REFERENCES materiel(idmateriel);
+
 
 
 CREATE TABLE natureMouvement(
@@ -105,7 +193,6 @@ CREATE TABLE detailmouvementphysique(
    commentaire NVARCHAR2(1000), 
    statut NUMBER DEFAULT 0
 );
-
 
 ALTER TABLE detailmouvementphysique MODIFY commentaire NVARCHAR2(1000) DEFAULT 'Aucun commentaire';
 ALTER TABLE detailmouvementphysique MODIFY description NVARCHAR2(1000) DEFAULT 'Aucune description';
@@ -150,71 +237,6 @@ ALTER TABLE detailmouvementfictif ADD FOREIGN KEY(iddepot) REFERENCES depot(idde
 
 
 
-CREATE TABLE devis(
-    iddevis VARCHAR2(50) PRIMARY KEY NOT NULL ,
-    iddetailmouvementphysique VARCHAR2(50) NOT NULL,
-    idclient varchar2(100) NOT NULL , 
-    datedevis TIMESTAMP DEFAULT current_timestamp,
-    statut number DEFAULT  0,
-    libelle NVARCHAR2(1000)
-);
-
-ALTER TABLE devis ADD FOREIGN KEY (idclient) REFERENCES client(idclient);
-ALTER TABLE devis ADD FOREIGN KEY(iddetailmouvementphysique) REFERENCES detailmouvementphysique(iddetailmouvementphysique);
-
-CREATE TABLE detaildevis(
-    iddetaildevis VARCHAR(50) PRIMARY KEY,
-    iddevis VARCHAR2(100) NOT NULL ,
-    idarticle VARCHAR2(100) NOT NULL ,
-    description NVARCHAR2(1000),
-    quantite NUMBER(15,2) DEFAULT  0 NOT NULL ,
-    PU NUMBER(15,2) DEFAULT  0 NOT NULL ,
-    total NUMBER(15,2) DEFAULT  0 NOT NULL 
-);
-
-ALTER TABLE detaildevis MODIFY description NVARCHAR2(1000) DEFAULT 'Aucune description';
-ALTER TABLE detaildevis ADD FOREIGN KEY(iddevis) REFERENCES devis(iddevis);
-ALTER TABLE detaildevis ADD FOREIGN KEY(idarticle) REFERENCES article(idarticle);
-
-CREATE TABLE proforma(
-    idproforma VARCHAR(50) PRIMARY KEY,
-    iddevis VARCHAR2(50) NOT NULL,
-    datevalidation TIMESTAMP DEFAULT current_timestamp,
-    FOREIGN KEY(iddevis) REFERENCES devis(iddevis)
-);
-
-
-CREATE TABLE boncommande(
-    idboncommande VARCHAR2(100) NOT NULL PRIMARY KEY,
-    idproforma VARCHAR2(50) NOT NULL,
-    dateboncommande TIMESTAMP DEFAULT  current_timestamp,
-    statut number DEFAULT  0
-);
-
-ALTER TABLE boncommande ADD FOREIGN KEY (idproforma) REFERENCES proforma(idproforma);
-
-
-CREATE TABLE bonlivraison(
-    idbonlivraison VARCHAR2(100) NOT NULL  PRIMARY KEY,
-    idboncommande VARCHAR2(100) NOT NULL ,
-    datebonlivraison TIMESTAMP DEFAULT  current_timestamp,
-    statut number DEFAULT  0
-);
-
-ALTER TABLE bonlivraison ADD FOREIGN KEY(idboncommande) REFERENCES boncommande(idboncommande);
-
-
-CREATE TABLE facturemateriel(
-    idfacturemateriel VARCHAR2(50) PRIMARY KEY NOT NULL ,
-    dateFacture TIMESTAMP DEFAULT  current_timestamp,
-    idclient varchar2(100) NOT NULL , 
-    iddetailmouvementphysique VARCHAR2(50) NOT NULL,
-    statut number DEFAULT  0
-);
-
-ALTER TABLE facturemateriel ADD FOREIGN KEY(iddetailmouvementphysique) REFERENCES detailmouvementphysique(iddetailmouvementphysique);
-ALTER TABLE facturemateriel ADD FOREIGN KEY(idclient) REFERENCES client(idclient);
-
 
 CREATE TABLE paiement(
     id VARCHAR2(50) PRIMARY KEY NOT NULL ,
@@ -239,6 +261,7 @@ DROP TABLE detailmouvementfictif;
 DROP TABLE detailmouvementphysique;
 DROP TABLE mouvementStock;
 DROP TABLE natureMouvement;
+DROP TABLE emplacement;
 DROP TABLE depot;
 DROP TABLE materiel;
 DROP TABLE article;
