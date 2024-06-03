@@ -138,6 +138,7 @@ CREATE TABLE stockage(
 );
 
 ALTER TABLE stockage ADD FOREIGN KEY(idarticle) REFERENCES article(idarticle);
+ALTER TABLE stockage ADD etatstocke number DEFAULT 0;
 -- ALTER TABLE stockage ADD FOREIGN KEY(idmateriel) REFERENCES materiel(idmateriel);
 
 
@@ -154,6 +155,9 @@ CREATE TABLE distribution(
 
 ALTER TABLE distribution ADD FOREIGN KEY(iddepot) REFERENCES depot(iddepot);
 ALTER TABLE distribution ADD FOREIGN KEY(idarticle) REFERENCES article(idarticle);
+ALTER TABLE distribution ADD idemplacement VARCHAR2(100);
+ALTER TABLE distribution ADD FOREIGN KEY(idemplacement) REFERENCES emplacement(idemplacement);
+ALTER TABLE distribution ADD etatdistribue number DEFAULT 0;
 -- ALTER TABLE distribution ADD FOREIGN KEY(idmateriel) REFERENCES materiel(idmateriel);
 
 

@@ -139,7 +139,12 @@ SELECT
     a.marque,
     a.modele,
     a.codearticle,
-    s.statut
+    s.statut,
+    CASE 
+    s.etatstocke
+        WHEN 0 THEN 'ABIME'
+        ELSE 'BON ETAT'
+    END AS etat
 FROM stockage s
 join article a on s.idarticle=a.idarticle order by  s.datestockage desc; 
 
@@ -157,10 +162,17 @@ SELECT
     a.codearticle,
     de.codedep,
     de.depot,
-    d.statut
+    e.codeemp,
+    d.statut,
+    CASE 
+    d.etatdistribue
+        WHEN 0 THEN 'ABIME'
+        ELSE 'BON ETAT'
+    END AS etat
 FROM distribution d
 join article a on d.idarticle=a.idarticle 
-join depot de on de.iddepot=d.iddepot order by d.datedistribution desc;  
+left join depot de on de.iddepot=d.iddepot
+left join emplacement e on e.idemplacement=d.idemplacement order by d.datedistribution desc;  
 
 -- Inventaire
 drop view vue_inventaire;
