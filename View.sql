@@ -160,8 +160,10 @@ SELECT
     a.marque,
     a.modele,
     a.codearticle,
+    de.iddepot,
     de.codedep,
     de.depot,
+    e.idemplacement,
     e.codeemp,
     d.statut,
     CASE 
@@ -189,6 +191,35 @@ SELECT
     i.statut
 FROM inventaire i
 join article a on i.idarticle=a.idarticle order by i.dateinventaire desc;
+
+
+
+
+-- Stock par article
+CREATE OR REPLACE VIEW stock_article as 
+SELECT 
+    a.idarticle,
+    a.marque,
+    a.modele,
+    a.codearticle,
+    coalesce(sum(d.quantite),0) as quantitestock,
+    a.idtypeMateriel,
+    a.TYPEMATERIEL,
+    a.val,
+    d.etat
+    FROM vue_distribution d
+    join liste_article a on d.idarticle=a.idarticle group by 
+    a.idarticle,
+    a.marque,
+    a.modele,
+    a.codearticle,
+    a.idtypeMateriel,
+    a.TYPEMATERIEL,
+    a.val,
+    d.etat;
+
+
+
 
 
 drop view mouvement_physique;
@@ -223,58 +254,58 @@ from  DETAILMOUVEMENTPHYSIQUE dmp
 
 
 
-CREATE OR REPLACE view mouvement_stock as
-SELECT
-        MS.IDMOUVEMENTSTOCK,
-        MS.DATEDEPOT,
-        ms.TYPEMOUVEMENT as TYPE,
-       case ms.TYPEMOUVEMENT WHEN 1 THEN
-                                 'ENTREE'
-                             WHEN -1 THEN
-                                 'SORTIE'
-        END as MOUVEMENT,
-        N.IDNATUREMOUVEMENT,
-        N.TYPEMOUVEMENT,
-        N.NATUREMOUVEMENT,
-        E.ID as IDETUDIANT,
-        E.NOM,
-        E.PRENOM,
-        E.MAIL,
-        E.CONTACT,
-        E.ADRESSE,
-        MS.STATUT
-FROM MOUVEMENTSTOCK MS join NATUREMOUVEMENT N on ms.IDNATUREMOUVEMENT=N.IDNATUREMOUVEMENT join ETUDIANT E on E.ID=MS.IDETUDIANT ORDER BY MS.DATEDEPOT DESC;
+-- CREATE OR REPLACE view mouvement_stock as
+-- SELECT
+--         MS.IDMOUVEMENTSTOCK,
+--         MS.DATEDEPOT,
+--         ms.TYPEMOUVEMENT as TYPE,
+--        case ms.TYPEMOUVEMENT WHEN 1 THEN
+--                                  'ENTREE'
+--                              WHEN -1 THEN
+--                                  'SORTIE'
+--         END as MOUVEMENT,
+--         N.IDNATUREMOUVEMENT,
+--         N.TYPEMOUVEMENT,
+--         N.NATUREMOUVEMENT,
+--         E.ID as IDETUDIANT,
+--         E.NOM,
+--         E.PRENOM,
+--         E.MAIL,
+--         E.CONTACT,
+--         E.ADRESSE,
+--         MS.STATUT
+-- FROM MOUVEMENTSTOCK MS join NATUREMOUVEMENT N on ms.IDNATUREMOUVEMENT=N.IDNATUREMOUVEMENT join ETUDIANT E on E.ID=MS.IDETUDIANT ORDER BY MS.DATEDEPOT DESC;
 
-drop view mouvement_fictif;
-Create or replace view mouvement_fictif as
-select dmf.IDDETAILMOUVEMENTFICTIF,
-       ms.IDMOUVEMENTSTOCK,
-       ms.DATEDEPOT,
-       ms.TYPEMOUVEMENT,
-       case ms.TYPEMOUVEMENT WHEN 1 THEN
-                                 'ENTREE'
-                             WHEN -1 THEN
-                                 'SORTIE'
-           END as MOUVEMENT,
-       nm.NATUREMOUVEMENT,
-       nm.IDNATUREMOUVEMENT,
-       m.MARQUE,
-       m.MODELE,
-       m.NUMSERIE,
-       d.DEPOT,
-       m.CAUTION,
-       dmf.IDDEPOT,
-       dmf.DATEDEB,
-       dmf.DATEFIN,
-       dmf.IDMATERIEL,
-       dmf.COMMENTAIRE,
-       dmf.DESCRIPTION,
-       dmf.STATUT
-from  DETAILMOUVEMENTFICTIF dmf
-          join MOUVEMENTSTOCK ms on ms.IDMOUVEMENTSTOCK = dmf.IDMOUVEMENT
-          join LISTE_MATERIEL m on m.IDMATERIEL = dmf.IDMATERIEL
-          join DEPOT d on dmf.IDDEPOT = d.IDDEPOT
-          join NATUREMOUVEMENT nm on ms.IDNATUREMOUVEMENT = nm.IDNATUREMOUVEMENT ORDER BY ms.DATEDEPOT DESC;
+-- drop view mouvement_fictif;
+-- Create or replace view mouvement_fictif as
+-- select dmf.IDDETAILMOUVEMENTFICTIF,
+--        ms.IDMOUVEMENTSTOCK,
+--        ms.DATEDEPOT,
+--        ms.TYPEMOUVEMENT,
+--        case ms.TYPEMOUVEMENT WHEN 1 THEN
+--                                  'ENTREE'
+--                              WHEN -1 THEN
+--                                  'SORTIE'
+--            END as MOUVEMENT,
+--        nm.NATUREMOUVEMENT,
+--        nm.IDNATUREMOUVEMENT,
+--        m.MARQUE,
+--        m.MODELE,
+--        m.NUMSERIE,
+--        d.DEPOT,
+--        m.CAUTION,
+--        dmf.IDDEPOT,
+--        dmf.DATEDEB,
+--        dmf.DATEFIN,
+--        dmf.IDMATERIEL,
+--        dmf.COMMENTAIRE,
+--        dmf.DESCRIPTION,
+--        dmf.STATUT
+-- from  DETAILMOUVEMENTFICTIF dmf
+--           join MOUVEMENTSTOCK ms on ms.IDMOUVEMENTSTOCK = dmf.IDMOUVEMENT
+--           join LISTE_MATERIEL m on m.IDMATERIEL = dmf.IDMATERIEL
+--           join DEPOT d on dmf.IDDEPOT = d.IDDEPOT
+--           join NATUREMOUVEMENT nm on ms.IDNATUREMOUVEMENT = nm.IDNATUREMOUVEMENT ORDER BY ms.DATEDEPOT DESC;
 
 
 -- Vue paiement
@@ -298,46 +329,7 @@ from PAIEMENT p
 select * from paiement_facture;
 
 
--- Stock par article
-CREATE OR REPLACE VIEW stock_article as 
-WITH dates AS (
-    SELECT 
-        TRUNC(SYSDATE, 'YYYY') + LEVEL - 1 AS date_day
-    FROM 
-        dual
-    CONNECT BY 
-        LEVEL <= ADD_MONTHS(TRUNC(SYSDATE, 'YYYY'), 12) - TRUNC(SYSDATE, 'YYYY')
-)
-SELECT 
-    la.idarticle,
-    la.marque,
-    la.modele,
-    la.description,
-    la.IDTYPEMATERIEL,
-    la.TYPEMATERIEL,
-    EXTRACT(MONTH FROM d.date_day) AS mois,
-    TO_CHAR(d.date_day, 'Month') AS mois_nom,
-    EXTRACT(YEAR FROM d.date_day) AS annee,
-    COALESCE(SUM(quantite), 0) AS quantite
-FROM 
-    liste_article la
-CROSS JOIN 
-    dates d
-LEFT JOIN 
-    detailmouvementphysique dm ON la.idarticle = dm.idarticle AND dm.DATEDEPOT = d.date_day
-GROUP BY 
-    la.idarticle,
-    la.marque,
-    la.modele,
-    la.description,
-    la.IDTYPEMATERIEL,
-    la.TYPEMATERIEL,
-    TO_CHAR(d.date_day, 'Month'),
-    EXTRACT(MONTH FROM d.date_day),
-    EXTRACT(YEAR FROM d.date_day);
 
--- select coalesce(sum(quantite),0) as quantite,la.idarticle,la.marque,la.modele,la.description,la.IDTYPEMATERIEL,la.TYPEMATERIEL
--- from detailmouvementphysique dm  right join liste_article la on la.idarticle=dm.idarticle  group by la.idarticle,la.marque,la.modele,la.description,la.IDTYPEMATERIEL,la.TYPEMATERIEL;
 
 -- Total des articles par depot
 CREATE OR REPLACE VIEW stock_article_depot as 
