@@ -188,7 +188,12 @@ SELECT
     a.marque,
     a.modele,
     a.codearticle,
-    i.statut
+    i.statut,
+    CASE 
+    i.etatinventaire
+        WHEN 0 THEN 'ABIME'
+        ELSE 'BON ETAT'
+    END AS etat
 FROM inventaire i
 join article a on i.idarticle=a.idarticle order by i.dateinventaire desc;
 
@@ -218,6 +223,71 @@ SELECT
     a.val,
     d.etat;
 
+-- Etat de stock par annee
+CREATE OR REPLACE VIEW etat_stock_annee as 
+SELECT 
+    EXTRACT(YEAR FROM dateinventaire) AS annee,
+    EXTRACT(MONTH FROM dateinventaire) AS mois,
+    TO_CHAR(dateinventaire, 'Month') AS moisnom,
+    SUM(quantitereel) AS quantitetotale,
+    SUM(CASE WHEN s.etatinventaire = 0 THEN s.quantitereel ELSE 0 END) AS articleabime,
+    SUM(CASE WHEN s.etatinventaire = 0 THEN s.quantitereel * a.prix ELSE 0 END) AS totalprixabime,
+    SUM(CASE WHEN s.etatinventaire = 1 THEN s.quantitereel ELSE 0 END) AS articlebonetat,
+    SUM(CASE WHEN s.etatinventaire = 1 THEN s.quantitereel * a.prix ELSE 0 END) AS totalprixbonetat
+FROM 
+    inventaire s join article a on s.idarticle=a.idarticle 
+GROUP BY 
+    EXTRACT(YEAR FROM dateinventaire),
+    TO_CHAR(dateinventaire, 'Month'),
+    EXTRACT(MONTH FROM dateinventaire)
+order by EXTRACT(YEAR FROM dateinventaire);
+
+-- Detail etat_stock_annee
+CREATE OR REPLACE VIEW etat_detailstock_annee AS 
+SELECT 
+    tm.idtypeMateriel,
+    tm.typeMateriel,
+    tm.val,
+    EXTRACT(YEAR FROM i.dateinventaire) AS annee,
+    EXTRACT(MONTH FROM i.dateinventaire) AS mois,
+    TO_CHAR(i.dateinventaire, 'Month') AS moisnom,
+    SUM(quantitereel) AS quantitetotale,
+    SUM(CASE WHEN i.etatinventaire = 0 THEN i.quantitereel ELSE 0 END) AS articleabime,
+    SUM(CASE WHEN i.etatinventaire = 0 THEN i.quantitereel * ia.prix ELSE 0 END) AS totalprixabime,
+    SUM(CASE WHEN i.etatinventaire = 1 THEN i.quantitereel ELSE 0 END) AS articlebonetat,
+    SUM(CASE WHEN i.etatinventaire = 1 THEN i.quantitereel * ia.prix ELSE 0 END) AS totalprixbonetat
+FROM 
+    inventaire i
+JOIN
+    article ia ON i.idarticle = ia.idarticle
+JOIN 
+    typeMateriel tm ON ia.idtypeMateriel = tm.idtypeMateriel
+GROUP BY 
+    tm.idtypeMateriel, 
+    tm.typeMateriel, EXTRACT(YEAR FROM i.dateinventaire), 
+    EXTRACT(MONTH FROM i.dateinventaire),TO_CHAR(i.dateinventaire, 'Month'),
+    tm.val
+ORDER BY 
+    tm.idtypeMateriel, 
+    EXTRACT(YEAR FROM i.dateinventaire), 
+    EXTRACT(MONTH FROM i.dateinventaire);
+
+
+-- Stat commande
+CREATE OR REPLACE VIEW total_commande_annee AS
+SELECT 
+    EXTRACT(YEAR FROM datecommande) AS annee,
+    EXTRACT(MONTH FROM datecommande) AS mois,
+    TO_CHAR(datecommande, 'Month') AS moisnom,
+    COUNT(*) AS totalcommandes
+FROM 
+    Commande
+GROUP BY 
+    EXTRACT(YEAR FROM datecommande),
+    EXTRACT(MONTH FROM datecommande),
+    TO_CHAR(datecommande, 'Month')
+ORDER BY 
+    annee, mois;
 
 
 
@@ -306,28 +376,6 @@ from  DETAILMOUVEMENTPHYSIQUE dmp
 --           join LISTE_MATERIEL m on m.IDMATERIEL = dmf.IDMATERIEL
 --           join DEPOT d on dmf.IDDEPOT = d.IDDEPOT
 --           join NATUREMOUVEMENT nm on ms.IDNATUREMOUVEMENT = nm.IDNATUREMOUVEMENT ORDER BY ms.DATEDEPOT DESC;
-
-
--- Vue paiement
-drop view paiement_facture;
-Create or  REPLACE view  paiement_facture as
-select p.id,
-       p.IDFACTUREMATERIEL,
-       c.NOM,
-       c.ADRESSE,
-       c.FAX,
-       c.NUMSTAT,
-       c.NIF,
-       c.TELEPHONE,
-       c.RC,
-       mp.VAL,
-       p.DATEPAIEMENT
-from PAIEMENT p
-         join CLIENT c on p.IDCLIENT = c.IDCLIENT
-         join MODEPAIEMENT mp on p.IDMODEPAIEMENT = mp.ID;
-
-select * from paiement_facture;
-
 
 
 

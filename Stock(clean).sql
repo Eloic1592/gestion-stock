@@ -173,6 +173,7 @@ CREATE TABLE inventaire(
 );
 
 ALTER TABLE inventaire ADD FOREIGN KEY(idarticle) REFERENCES article(idarticle);
+ALTER TABLE inventaire ADD etatinventaire number DEFAULT 0;
 -- ALTER TABLE inventaire ADD FOREIGN KEY(idmateriel) REFERENCES materiel(idmateriel);
 
 
