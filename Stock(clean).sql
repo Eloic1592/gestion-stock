@@ -131,22 +131,21 @@ ALTER TABLE reception ADD FOREIGN KEY(idcommande) REFERENCES Commande(idcommande
 CREATE TABLE stockage(
     idstockage VARCHAR2(100) NOT NULL  PRIMARY KEY,
     idarticle VARCHAR2(100),
-    -- idmateriel varchar2(100),
     quantite NUMBER(15,2) default 0,
     datestockage TIMESTAMP DEFAULT  current_timestamp,
     statut number DEFAULT  0
 );
 
 ALTER TABLE stockage ADD FOREIGN KEY(idarticle) REFERENCES article(idarticle);
-ALTER TABLE stockage ADD etatstocke number DEFAULT 0;
--- ALTER TABLE stockage ADD FOREIGN KEY(idmateriel) REFERENCES materiel(idmateriel);
+ALTER TABLE stockage ADD etatstocke va DEFAULT 0;
+ALTER TABLE stockage ADD idmateriel VARCHAR2(100);
+ALTER TABLE stockage ADD FOREIGN KEY(IDMATERIEL) REFERENCES materiel(IDMATERIEL);
 
 
 -- Repartition des articles 
 CREATE TABLE distribution(
     iddistribution VARCHAR2(100) NOT NULL  PRIMARY KEY,
     idarticle VARCHAR2(100),
-    -- idmateriel varchar2(100),
     quantite NUMBER(15,2) default 0,
     datedistribution TIMESTAMP DEFAULT  current_timestamp,
     iddepot VARCHAR2(100),
@@ -158,14 +157,15 @@ ALTER TABLE distribution ADD FOREIGN KEY(idarticle) REFERENCES article(idarticle
 ALTER TABLE distribution ADD idemplacement VARCHAR2(100);
 ALTER TABLE distribution ADD FOREIGN KEY(idemplacement) REFERENCES emplacement(idemplacement);
 ALTER TABLE distribution ADD etatdistribue number DEFAULT 0;
--- ALTER TABLE distribution ADD FOREIGN KEY(idmateriel) REFERENCES materiel(idmateriel);
+ALTER TABLE distribution ADD idmateriel VARCHAR2(100);
+ALTER TABLE distribution ADD FOREIGN KEY(idmateriel) REFERENCES materiel(idmateriel);
 
 
 -- Inventaire
 CREATE TABLE inventaire(
     idinventaire VARCHAR2(100) NOT NULL  PRIMARY KEY,
     idarticle VARCHAR2(100),
-    -- idmateriel varchar2(100),
+    idmateriel varchar2(100),
     quantitereel NUMBER(15,2) default 0,
     quantitetheorique NUMBER(15,2) default 0,
     dateinventaire TIMESTAMP DEFAULT  current_timestamp,
@@ -174,7 +174,8 @@ CREATE TABLE inventaire(
 
 ALTER TABLE inventaire ADD FOREIGN KEY(idarticle) REFERENCES article(idarticle);
 ALTER TABLE inventaire ADD etatinventaire number DEFAULT 0;
--- ALTER TABLE inventaire ADD FOREIGN KEY(idmateriel) REFERENCES materiel(idmateriel);
+ALTER TABLE inventaire ADD idmateriel VARCHAR2(100);
+ALTER TABLE inventaire ADD FOREIGN KEY(idmateriel) REFERENCES materiel(idmateriel);
 
 
 
@@ -228,7 +229,7 @@ CREATE TABLE detailmouvementfictif(
     dateDeb TIMESTAMP DEFAULT  current_timestamp,
     dateFin TIMESTAMP DEFAULT  current_timestamp,
     caution NUMBER(15,2) DEFAULT  0,
-    idmateriel varchar2(50) NOT NULL ,
+    idmateriel varchar2(50) NOT NULL,
     iddepot varchar(50) NOT NULL,
     description NVARCHAR2(1000),
     commentaire NVARCHAR2(1000),
