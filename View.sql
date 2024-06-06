@@ -189,6 +189,7 @@ SELECT
     a.modele,
     a.codearticle,
     i.statut,
+    i.etatinventaire,
     CASE 
     i.etatinventaire
         WHEN 0 THEN 'ABIME'
@@ -199,8 +200,7 @@ join article a on i.idarticle=a.idarticle order by i.dateinventaire desc;
 
 
 
-
--- Stock par article
+-- Stock reel des produits via stockage et distribution
 CREATE OR REPLACE VIEW stock_article as 
 SELECT 
     a.idarticle,
@@ -222,6 +222,42 @@ SELECT
     a.TYPEMATERIEL,
     a.val,
     d.etat;
+
+-- Stock via a l'inventaire des produits
+CREATE OR REPLACE VIEW stock_article_inventaire as 
+SELECT
+    a.idarticle,
+    a.marque,
+    a.modele,
+    a.codearticle,
+    a.typeMateriel,
+    i.quantitereel,
+    SUM(CASE WHEN i.etatinventaire = 0 THEN i.quantitereel ELSE 0 END) articleabime,
+    SUM(CASE WHEN i.etatinventaire = 1 THEN i.quantitereel ELSE 0 END) articlebonetat,
+    i.dateinventaire,
+    i.statut,
+    i.etat
+    FROM vue_inventaire i 
+    join liste_article a 
+    on i.idarticle=a.idarticle
+    group by 
+    i.dateinventaire,
+    i.etat,
+    a.idarticle,
+    a.marque,
+    a.modele,
+    a.codearticle,
+    a.typeMateriel,
+    i.statut,
+    i.quantitereel
+    order by i.dateinventaire desc;
+
+
+
+
+-- Stock groupee par depot
+
+
 
 -- Etat de stock par annee
 CREATE OR REPLACE VIEW etat_stock_annee as 
