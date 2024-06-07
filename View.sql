@@ -254,11 +254,6 @@ SELECT
 
 
 
-
--- Stock groupee par depot
-
-
-
 -- Etat de stock par annee
 CREATE OR REPLACE VIEW etat_stock_annee as 
 SELECT 

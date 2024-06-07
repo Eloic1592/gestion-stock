@@ -176,7 +176,7 @@ ALTER TABLE inventaire ADD FOREIGN KEY(idarticle) REFERENCES article(idarticle);
 ALTER TABLE inventaire ADD etatinventaire number DEFAULT 0;
 ALTER TABLE inventaire ADD idmateriel VARCHAR2(100);
 ALTER TABLE inventaire ADD FOREIGN KEY(idmateriel) REFERENCES materiel(idmateriel);
-
+ALTER TABLE inventaire ADD description NVARCHAR2(1000);
 
 
 CREATE TABLE natureMouvement(
