@@ -99,6 +99,14 @@ BEGIN
  return retour;
 END;
 
+CREATE OR REPLACE FUNCTION getseqcalendrierinventaire
+ RETURN NUMBER IS
+ retour NUMBER;
+BEGIN
+ SELECT SEQCALENDRIERINVENTAIRE.nextval INTO retour FROM dual;
+ return retour;
+END;
+
 
 CREATE OR REPLACE FUNCTION getseqemplacement
  RETURN NUMBER IS
@@ -107,6 +115,12 @@ BEGIN
  SELECT SEQEMPLACEMENT.nextval INTO retour FROM dual;
  return retour;
 END;
+
+
+
+
+
+
 
 CREATE OR REPLACE FUNCTION getseqmouvementStock
  RETURN NUMBER IS

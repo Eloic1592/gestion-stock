@@ -310,15 +310,54 @@ SELECT
     EXTRACT(YEAR FROM datecommande) AS annee,
     EXTRACT(MONTH FROM datecommande) AS mois,
     TO_CHAR(datecommande, 'Month') AS moisnom,
-    COUNT(*) AS totalcommandes
+    COUNT(*) AS totalcommandes,
+    AVG(COUNT(*)) OVER (PARTITION BY EXTRACT(MONTH FROM datecommande)) AS moyennecommandes
 FROM 
     Commande
 GROUP BY 
     EXTRACT(YEAR FROM datecommande),
     EXTRACT(MONTH FROM datecommande),
     TO_CHAR(datecommande, 'Month')
-ORDER BY 
-    annee, mois;
+ORDER BY    
+    EXTRACT(YEAR FROM datecommande),
+    EXTRACT(MONTH FROM datecommande) DESC;
+
+
+-- Commande totale des articles groupee par mois par annee
+CREATE OR REPLACE VIEW total_commande_article AS
+SELECT 
+    EXTRACT(YEAR FROM c.datecommande) AS annee,
+    EXTRACT(MONTH FROM c.datecommande) AS mois,
+    TO_CHAR(c.datecommande, 'Month') AS moisnom,
+    a.idarticle,
+    a.marque,
+    a.modele,
+    a.typemateriel,
+    a.codearticle,
+    a.val,
+    SUM(dc.quantite) AS quantitetotale
+FROM 
+    commande c
+JOIN 
+    detailcommande dc ON c.idcommande = dc.idcommande
+ RIGHT JOIN 
+    liste_article a ON dc.idarticle = a.idarticle
+GROUP BY 
+    EXTRACT(YEAR FROM c.datecommande),
+    EXTRACT(MONTH FROM c.datecommande),
+    TO_CHAR(c.datecommande, 'Month'),
+    a.idarticle,
+    a.marque,
+    a.modele,
+    a.typemateriel,
+    a.codearticle,
+    a.val
+ORDER BY    
+    EXTRACT(YEAR FROM c.datecommande),
+    EXTRACT(MONTH FROM c.datecommande) DESC,
+    a.idarticle;
+
+
 
 
 
