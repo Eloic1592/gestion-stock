@@ -16,6 +16,32 @@ FROM
 JOIN 
     TYPEMATERIEL tm ON m.IDTYPEMATERIEL = tm.IDTYPEMATERIEL;
 
+
+drop view liste_materiel;
+CREATE or REPLACE VIEW liste_materiel AS
+SELECT 
+    m.IDMATERIEL,
+    tm.IDTYPEMATERIEL,
+    tm.TYPEMATERIEL,
+    tm.val,
+    m.MARQUE,
+    m.MODELE,
+    m.numSerie,
+    m.prixvente,
+    m.caution,
+    m.signature,
+    m.statut as statutmateriel,
+    CASE
+        m.STATUT
+        WHEN 0 THEN 'LIBRE'
+        ELSE 'OCCUPE'
+    END AS STATUT
+FROM 
+    materiel m
+JOIN 
+    TYPEMATERIEL tm ON m.IDTYPEMATERIEL = tm.IDTYPEMATERIEL;
+
+
 drop view liste_typemateriel;
 CREATE or REPLACE VIEW liste_typemateriel AS
 SELECT 
@@ -29,31 +55,6 @@ FROM
     TYPEMATERIEL T
 JOIN 
     CATEGORIEMATERIEL C ON T.IDCATEGORIEMATERIEL = C.IDCATEGORIEMATERIEL;
-
-
-DROP VIEW liste_materiel;
-CREATE or REPLACE VIEW liste_materiel AS
-SELECT 
-    m.IDMATERIEL,
-    tm.IDTYPEMATERIEL,
-    tm.TYPEMATERIEL,
-    m.MARQUE,
-    m.MODELE,
-    m.NUMSERIE,
-    m.DESCRIPTION,
-    m.PRIXVENTE,
-    m.CAUTION,
-    m.SIGNATURE,
-    m.STATUT AS ETAT,
-    CASE 
-    STATUT
-        WHEN 0 THEN 'LIBRE'
-        ELSE 'OCCUPE'
-    END AS STATUT
-FROM 
-    materiel m
-JOIN 
-    TYPEMATERIEL tm ON m.IDTYPEMATERIEL = tm.IDTYPEMATERIEL;
 
 drop view liste_emplacement;
 CREATE or REPLACE VIEW liste_emplacement AS
@@ -223,6 +224,38 @@ SELECT
     a.val,
     d.etat;
 
+-- Stock par materiel
+CREATE OR REPLACE VIEW stock_materiel as 
+SELECT 
+    m.IDMATERIEL,
+    tm.IDTYPEMATERIEL,
+    tm.TYPEMATERIEL,
+    tm.val,
+    m.MARQUE,
+    m.MODELE,
+    m.numSerie,
+    m.prixvente,
+    m.caution,
+    m.signature,
+    m.statut as statutmateriel,
+    CASE
+        m.STATUT
+        WHEN 0 THEN 'LIBRE'
+        ELSE 'OCCUPE'
+    END AS STATUT
+FROM 
+    materiel m
+JOIN 
+    TYPEMATERIEL tm ON m.IDTYPEMATERIEL = tm.IDTYPEMATERIEL
+ORDER BY  
+    m.statut;
+
+
+-- Stock par type de materiel
+CREATE OR REPLACE VIEW stock_typemateriel as 
+select (select count(idtypemateriel) from materiel where statut=0 AND idtypemateriel=t.idtypemateriel) as libre,(select count(idtypemateriel) from materiel where statut=1 AND idtypemateriel=t.idtypemateriel) as occupe,(select count(idtypemateriel) from materiel  WHERE idtypemateriel=t.idtypemateriel) as total,t.idtypemateriel,t.typemateriel from liste_materiel lm right join typemateriel t on lm.idtypemateriel=t.idtypemateriel group by t.idtypemateriel,t.typemateriel;
+
+
 -- Stock via a l'inventaire des produits
 CREATE OR REPLACE VIEW stock_article_inventaire as 
 SELECT
@@ -361,10 +394,10 @@ ORDER BY
 
 
 
+
 -- Total des articles par depot
 CREATE OR REPLACE VIEW stock_article_depot as 
 select coalesce(sum(quantite),0)as quantite,d.iddepot,d.depot from mouvement_physique mp right join depot d on mp.iddepot=d.iddepot group by d.iddepot,d.depot;
-
 
 
 -- Total des articles par type de materiel par depot
@@ -425,14 +458,22 @@ select count(*) from liste_materiel;
 
 
 
--- Stock par materiel
-CREATE OR REPLACE VIEW stock_materiel as 
-select (select count(idtypemateriel) from materiel where statut=0 AND idtypemateriel=t.idtypemateriel) as libre,(select count(idtypemateriel) from materiel where statut=1 AND idtypemateriel=t.idtypemateriel) as occupe,(select count(idtypemateriel) from materiel  WHERE idtypemateriel=t.idtypemateriel) as total,t.idtypemateriel,t.typemateriel from liste_materiel lm right join typemateriel t on lm.idtypemateriel=t.idtypemateriel group by t.idtypemateriel,t.typemateriel;
 
 
-
--- Rotation de stock par mois/annee (Quantite et monetaires)
--- Atao amin'ity rotation de stock ny LIFO sy FIFO 
+drop view liste_emplacement;
+CREATE or REPLACE VIEW liste_emplacement AS
+SELECT 
+    t.idemplacement,
+    d.depot,
+    d.iddepot,
+    d.codedep,
+    t.codeemp,
+    t.capacite,
+    t.codebarre
+FROM 
+    EMPLACEMENT T
+JOIN 
+    depot d ON T.iddepot = d.iddepot;
 
 
 -- Exemple de requête pour calculer le coût des articles vendus en utilisant FIFO
