@@ -196,8 +196,7 @@ ALTER TABLE inventaire ADD description NVARCHAR2(1000);
 
 CREATE TABLE natureMouvement(
     idnatureMouvement VARCHAR2(50) PRIMARY KEY NOT NULL ,
-    natureMouvement varchar2(100) NOT NULL,
-    typeMouvement NUMBER DEFAULT 0
+    natureMouvement varchar2(100) NOT NULL
 );
 
 -- ENTREE SORTIE PHYSIQUE

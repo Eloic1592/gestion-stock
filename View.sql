@@ -84,6 +84,15 @@ SELECT
 FROM ETUDIANT e join SEXE s on e.SEXE=S.ID;
 
 
+-- Liste nature
+Create OR REPLACE VIEW liste_nature AS
+SELECT 
+    n.idnatureMouvement,
+    n.naturemouvement
+FROM
+    natureMouvement n;
+
+
 -- Commande
 drop view client_commande;
 CREATE OR REPLACE view vue_commande as
