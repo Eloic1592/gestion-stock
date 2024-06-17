@@ -568,6 +568,106 @@ select coalesce(sum(mp.quantite),0) as total,n.idnatureMouvement,n.natureMouveme
 CREATE OR REPLACE view total_materiel AS
 select count(*) from liste_materiel;
 
+-- Cycle des mouvements
+CREATE OR REPLACE VIEW cycle_mouvement AS 
+WITH DateMinMax AS (
+    SELECT 
+        TO_CHAR(MIN(DATEDEPOT), 'YYYY') AS min_year,
+        TO_CHAR(MAX(DATEDEPOT), 'YYYY') AS max_year
+    FROM mouvement_physique
+),
+AllYears AS (
+    SELECT 
+        TO_NUMBER(TO_CHAR(ADD_MONTHS(TO_DATE('01-01-' || min_year), 12 * (LEVEL - 1)), 'YYYY')) AS annee
+    FROM DateMinMax
+    CONNECT BY LEVEL <= CEIL(MONTHS_BETWEEN(TO_DATE(max_year, 'YYYY'), TO_DATE(min_year, 'YYYY')) / 12) + 1
+),
+AllMonths AS (
+    SELECT 
+        TO_NUMBER(TO_CHAR(ADD_MONTHS(TO_DATE('01-01-' || annee), LEVEL - 1), 'MM')) AS mois,
+        TO_CHAR(ADD_MONTHS(TO_DATE('01-01-' || annee), LEVEL - 1), 'MONTH') AS mois_nom,
+        annee
+    FROM AllYears
+    CONNECT BY LEVEL <= 12
+)
+SELECT 
+    AllMonths.annee,
+    AllMonths.mois,
+    AllMonths.mois_nom,
+    TO_CHAR(NVL(SUM(CASE WHEN mp.TYPEMOUVEMENT = -1 THEN mp.quantite ELSE 0 END), 0), '9999999999999') AS sortie,
+    TO_CHAR(NVL(SUM(CASE WHEN mp.TYPEMOUVEMENT = 1 THEN mp.quantite ELSE 0 END), 0), '9999999999999') AS entree,
+    nm.IDNATUREMOUVEMENT,
+    nm.NATUREMOUVEMENT
+FROM 
+    AllMonths
+CROSS JOIN 
+    NATUREMOUVEMENT nm
+LEFT JOIN 
+    mouvement_physique mp ON EXTRACT(MONTH FROM mp.DATEDEPOT) = AllMonths.mois 
+                            AND EXTRACT(YEAR FROM mp.DATEDEPOT) = AllMonths.annee 
+                            AND nm.IDNATUREMOUVEMENT = mp.IDNATUREMOUVEMENT
+GROUP BY 
+    AllMonths.annee, AllMonths.mois, AllMonths.mois_nom, nm.IDNATUREMOUVEMENT, nm.NATUREMOUVEMENT
+ORDER BY 
+    AllMonths.annee, AllMonths.mois, nm.IDNATUREMOUVEMENT;
+
+
+-- Rotation de stock
+CREATE OR REPLACE  view rotation_stock as
+WITH 
+CMV_par_annee AS (
+    SELECT 
+        EXTRACT(YEAR FROM datedepot) AS annee,
+        SUM(quantite * PU) AS CMV
+    FROM 
+        detailmouvementphysique
+    WHERE 
+        typeMouvement = -1 /* Mouvement de sortie */
+        AND EXTRACT(YEAR FROM datedepot) BETWEEN 2011 AND 2024
+    GROUP BY 
+        EXTRACT(YEAR FROM datedepot)
+),
+Stock_Acquis_Annuel AS (
+    SELECT 
+        EXTRACT(YEAR FROM datedepot) AS annee,
+        SUM(CASE WHEN typeMouvement = 1 THEN quantite ELSE -quantite END) AS stock_acquis
+    FROM 
+        detailmouvementphysique
+    WHERE 
+        EXTRACT(YEAR FROM datedepot) BETWEEN 2011 AND 2024
+    GROUP BY 
+        EXTRACT(YEAR FROM datedepot)
+),
+Stock_Final_Annuel AS (
+    SELECT 
+        a.annee,
+        SUM(NVL(b.stock_acquis, 0)) OVER (ORDER BY a.annee ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS stock_final
+    FROM 
+        (SELECT DISTINCT EXTRACT(YEAR FROM TO_DATE('2011', 'YYYY') + LEVEL - 1) AS annee FROM dual CONNECT BY LEVEL <= 2024 - 2011 + 1) a
+    LEFT JOIN 
+        Stock_Acquis_Annuel b ON a.annee = b.annee
+),
+Stock_Moyen_Annuel AS (
+    SELECT 
+        annee,
+        (NVL(LAG(stock_final, 1, 0) OVER (ORDER BY annee), 0) + stock_final) / 2 AS stock_moyen
+    FROM 
+        Stock_Final_Annuel
+)
+SELECT 
+    cmv.annee,
+    cmv.CMV,
+    NVL(stock_moyen.stock_moyen, 0) AS stock_moyen,
+    CASE 
+        WHEN NVL(stock_moyen.stock_moyen, 0) = 0 THEN 0
+        ELSE ROUND(cmv.CMV / stock_moyen.stock_moyen, 2)
+    END AS rotation_de_stock
+FROM 
+    CMV_par_annee cmv
+LEFT JOIN 
+    Stock_Moyen_Annuel stock_moyen ON cmv.annee = stock_moyen.annee
+ORDER BY 
+    cmv.annee;
 
 
 
@@ -649,37 +749,6 @@ GROUP BY
 
 
 
-
-DROP VIEW liste_article;
-DROP VIEW liste_typemateriel;
-DROP VIEW liste_materiel;
-DROP VIEW mouvement_physique;
-DROP VIEW mouvement_fictif;
-DROP VIEW client_facture;
-DROP VIEW detail_facture;
-DROP VIEW paiement_facture;
-DROP VIEW mouvement_stock;
-DROP VIEW liste_etudiant;
-DROP VIEW client_devis;
-DROP VIEW detail_devis;
-DROP VIEW client_proforma;
-DROP VIEW detail_proforma;
-DROP VIEW client_commande;
-DROP VIEW client_livraison;
-DROP VIEW stock_article;
-DROP VIEW stock_materiel;
-DROP VIEW stock_article_depot;
-DROP VIEW stock_typemateriel_depot;
-DROP VIEW stat_naturemouvement;
-DROP VIEW liste_nature;
-DROP VIEW utilisation_materiel;
-DROP VIEW cycle_mouvement;
-DROP VIEW stat_typemateriel;
-DROP VIEW temps_rupture_stock_article;
-DROP VIEW taux_rupture_article;
-DROP VIEW rotation_stock;
-DROP VIEW v_FIFO;
-DROP VIEW v_LIFO;
 
 
 
