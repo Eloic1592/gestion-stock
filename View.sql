@@ -612,6 +612,61 @@ ORDER BY
     AllMonths.annee, AllMonths.mois, nm.IDNATUREMOUVEMENT;
 
 
+-- Rupture des articles
+CREATE OR REPLACE  view taux_rupture_article as
+WITH CTE_Rupture AS (
+    SELECT 
+        dm.IDARTICLE,
+        a.MARQUE,
+        a.MODELE,
+        dm.DATEDEPOT AS debut_rupture,
+        LEAD(dm.DATEDEPOT) OVER (PARTITION BY dm.IDARTICLE ORDER BY dm.DATEDEPOT) - INTERVAL '1' DAY AS fin_rupture
+    FROM 
+        detailmouvementphysique dm
+    JOIN 
+        article a ON dm.IDARTICLE = a.IDARTICLE
+    WHERE 
+        dm.QUANTITE <= 0
+),
+CTE_Duree AS (
+    SELECT 
+        IDARTICLE,
+        MARQUE,
+        MODELE,
+        COUNT(*) AS jours_rupture
+    FROM 
+        CTE_Rupture
+    GROUP BY 
+        IDARTICLE, MARQUE, MODELE
+),
+CTE_Total AS (
+    SELECT 
+        dm.IDARTICLE,
+        a.MARQUE,
+        a.MODELE,
+        COUNT(*) AS jours_total
+    FROM 
+        detailmouvementphysique dm
+    JOIN 
+        article a ON dm.IDARTICLE = a.IDARTICLE
+    GROUP BY 
+        dm.IDARTICLE, a.MARQUE, a.MODELE
+)
+SELECT 
+    la.IDARTICLE,
+    la.MARQUE,
+    la.MODELE,
+    la.DESCRIPTION,
+    la.codearticle,
+    COALESCE(ROUND((r.jours_rupture / t.jours_total) * 100, 2), 0) AS Taux_Rupture_Stock
+FROM 
+    liste_article la
+LEFT JOIN 
+    CTE_Duree r ON la.IDARTICLE = r.IDARTICLE AND la.MARQUE = r.MARQUE AND la.MODELE = r.MODELE
+LEFT JOIN 
+    CTE_Total t ON la.IDARTICLE = t.IDARTICLE AND la.MARQUE = t.MARQUE AND la.MODELE = t.MODELE;
+
+
 -- Rotation de stock
 CREATE OR REPLACE  view rotation_stock as
 WITH 
