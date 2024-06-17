@@ -266,7 +266,7 @@ select (select count(idtypemateriel) from materiel where statut=0 AND idtypemate
 
 
 -- Stock via a l'inventaire des produits
-CREATE OR REPLACE VIEW stock_article_inventaire as 
+CREATE OR REPLACE VIEW vue_distribution as 
 SELECT
     a.idarticle,
     a.marque,
@@ -394,12 +394,29 @@ GROUP BY
     a.typemateriel,
     a.codearticle,
     a.val
-ORDER BY    
+ORDER BY
+    SUM(dc.quantite),
     EXTRACT(YEAR FROM c.datecommande),
-    EXTRACT(MONTH FROM c.datecommande) DESC,
-    a.idarticle;
+    EXTRACT(MONTH FROM c.datecommande) desc;
 
 
+
+
+-- Emplacement
+drop view liste_emplacement;
+CREATE or REPLACE VIEW liste_emplacement AS
+SELECT 
+    t.idemplacement,
+    d.depot,
+    d.iddepot,
+    d.codedep,
+    t.codeemp,
+    t.capacite,
+    t.codebarre
+FROM 
+    EMPLACEMENT T
+JOIN 
+    depot d ON T.iddepot = d.iddepot;
 
 
 
@@ -407,6 +424,7 @@ ORDER BY
 -- Total des articles par depot
 CREATE OR REPLACE VIEW stock_article_depot as 
 select coalesce(sum(quantite),0)as quantite,d.iddepot,d.depot from mouvement_physique mp right join depot d on mp.iddepot=d.iddepot group by d.iddepot,d.depot;
+
 
 
 -- Total des articles par type de materiel par depot
@@ -466,23 +484,6 @@ CREATE OR REPLACE view total_materiel AS
 select count(*) from liste_materiel;
 
 
-
-
-
-drop view liste_emplacement;
-CREATE or REPLACE VIEW liste_emplacement AS
-SELECT 
-    t.idemplacement,
-    d.depot,
-    d.iddepot,
-    d.codedep,
-    t.codeemp,
-    t.capacite,
-    t.codebarre
-FROM 
-    EMPLACEMENT T
-JOIN 
-    depot d ON T.iddepot = d.iddepot;
 
 
 -- Exemple de requête pour calculer le coût des articles vendus en utilisant FIFO
