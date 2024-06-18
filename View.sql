@@ -27,6 +27,7 @@ SELECT
     tm.val,
     m.MARQUE,
     m.MODELE,
+    m.description,
     m.numSerie,
     m.prixvente,
     m.caution,
