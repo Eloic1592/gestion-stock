@@ -10,7 +10,8 @@ SELECT
     m.DESCRIPTION,
     m.codearticle,
     m.prix,
-    m.quantitestock
+    m.quantitestock,
+    m.stocksecurite
 FROM 
     ARTICLE m
 JOIN 
@@ -182,9 +183,35 @@ SELECT
     d.etatdistribue
         WHEN 0 THEN 'ABIME'
         ELSE 'BON ETAT'
-    END AS etat
+    END AS etat 
 FROM distribution d
-join article a on d.idarticle=a.idarticle 
+join article a on d.idarticle=a.idarticle
+left join depot de on de.iddepot=d.iddepot
+left join emplacement e on e.idemplacement=d.idemplacement order by d.datedistribution desc;  
+
+drop view vue_distribution_materiel;
+CREATE OR REPLACE view vue_distribution_materiel as
+SELECT
+    d.iddistribution,
+    d.datedistribution,
+    d.quantite,
+    a.idmateriel,
+    a.marque,
+    a.modele,
+    a.numserie,
+    de.iddepot,
+    de.codedep,
+    de.depot,
+    e.idemplacement,
+    e.codeemp,
+    d.statut,
+    CASE 
+    d.etatdistribue
+        WHEN 0 THEN 'ABIME'
+        ELSE 'BON ETAT'
+    END AS etat 
+FROM distribution d
+join materiel a on d.idmateriel=a.idmateriel
 left join depot de on de.iddepot=d.iddepot
 left join emplacement e on e.idemplacement=d.idemplacement order by d.datedistribution desc;  
 
@@ -212,28 +239,38 @@ join article a on i.idarticle=a.idarticle order by i.dateinventaire desc;
 
 
 
--- Stock reel des produits via stockage et distribution
+-- Stock reel des produits
 CREATE OR REPLACE VIEW stock_article as 
 SELECT 
     a.idarticle,
     a.marque,
     a.modele,
     a.codearticle,
-    coalesce(sum(d.quantite),0) as quantitestock,
+    coalesce(sum(a.quantitestock),0) as quantitestock,
+    a.stocksecurite,
     a.idtypeMateriel,
     a.TYPEMATERIEL,
     a.val,
-    d.etat
-    FROM vue_distribution d
-    join liste_article a on d.idarticle=a.idarticle group by 
+           CASE
+           WHEN a.quantitestock <= (a.stocksecurite * 0.1) THEN 'Critique'
+           WHEN a.quantitestock <= (a.stocksecurite * 0.3) AND a.quantitestock > (a.stocksecurite * 0.1) THEN 'Urgent'
+           ELSE 'Normal'
+       END AS niveaustock,
+           CASE
+           WHEN a.quantitestock <= (a.stocksecurite * 0.1) THEN 5
+           WHEN a.quantitestock <= (a.stocksecurite * 0.3) AND a.quantitestock > (a.stocksecurite * 0.1) THEN 2
+           ELSE 0
+       END AS degre
+    FROM  liste_article a group by 
+    a.quantitestock,
+    a.stocksecurite,
     a.idarticle,
     a.marque,
     a.modele,
     a.codearticle,
     a.idtypeMateriel,
     a.TYPEMATERIEL,
-    a.val,
-    d.etat;
+    a.val;
 
 -- Stock par materiel
 CREATE OR REPLACE VIEW stock_materiel as 
@@ -666,6 +703,47 @@ LEFT JOIN
 LEFT JOIN 
     CTE_Total t ON la.IDARTICLE = t.IDARTICLE AND la.MARQUE = t.MARQUE AND la.MODELE = t.MODELE;
 
+    
+WITH sorties AS (
+    SELECT 
+        idarticle,
+        SUM(CASE WHEN typeMouvement = -1 THEN quantite ELSE 0 END) AS quantite_totale_sortie
+    FROM 
+        detailmouvementphysique
+    GROUP BY 
+        idarticle
+),
+stock_securite AS (
+    SELECT 
+        idarticle,
+        10 AS stock_securite -- Valeur fixe pour le stock de sécurité, peut être dynamique selon vos besoins
+    FROM 
+        article
+)
+SELECT 
+    a.idarticle,
+    a.marque,
+    a.modele,
+    a.description,
+    a.idarticle AS codearticle,
+    CASE 
+        WHEN s.stock_securite = 0 THEN 0
+        WHEN a.quantitestock < s.stock_securite THEN 100
+        ELSE ROUND(
+            LEAST(
+                (1 - (a.quantitestock - s.stock_securite) / s.stock_securite) * 100, 
+                100
+            ), 2
+        )
+    END AS taux_rupture_stock
+FROM 
+    article a
+LEFT JOIN 
+    sorties d
+    ON a.idarticle = d.idarticle
+LEFT JOIN 
+    stock_securite s
+    ON a.idarticle = s.idarticle;
 
 -- Rotation de stock
 CREATE OR REPLACE  view rotation_stock as

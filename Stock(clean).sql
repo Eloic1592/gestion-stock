@@ -55,6 +55,7 @@ ALTER TABLE article ADD codearticle varchar2(255);
 ALTER TABLE article MODIFY modele NVARCHAR2(1000) DEFAULT 'Modele non precise';
 ALTER TABLE article MODIFY description NVARCHAR2(1000) DEFAULT 'Aucune description';
 ALTER TABLE article ADD FOREIGN KEY (idtypeMateriel) REFERENCES typeMateriel(idtypeMateriel);
+ALTER TABLE article ADD stocksecurite NUMBER(15,2) DEFAULT 0;
 
 CREATE TABLE materiel(
     idmateriel VARCHAR2(50) PRIMARY KEY NOT NULL,
