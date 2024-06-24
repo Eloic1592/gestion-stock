@@ -627,27 +627,65 @@ AllMonths AS (
         annee
     FROM AllYears
     CONNECT BY LEVEL <= 12
+),
+TotalMovementByMonth AS (
+    SELECT 
+        EXTRACT(YEAR FROM mp.DATEDEPOT) AS annee,
+        EXTRACT(MONTH FROM mp.DATEDEPOT) AS mois,
+        COUNT(CASE WHEN mp.TYPEMOUVEMENT = 1 THEN 1 END) AS total_entrees,
+        COUNT(CASE WHEN mp.TYPEMOUVEMENT = -1 THEN 1 END) AS total_sorties,
+        COUNT(*) AS total_mouvements
+    FROM 
+        mouvement_physique mp
+    GROUP BY 
+        EXTRACT(YEAR FROM mp.DATEDEPOT), 
+        EXTRACT(MONTH FROM mp.DATEDEPOT)
 )
 SELECT 
     AllMonths.annee,
     AllMonths.mois,
     AllMonths.mois_nom,
-    TO_CHAR(NVL(SUM(CASE WHEN mp.TYPEMOUVEMENT = -1 THEN mp.quantite ELSE 0 END), 0), '9999999999999') AS sortie,
-    TO_CHAR(NVL(SUM(CASE WHEN mp.TYPEMOUVEMENT = 1 THEN mp.quantite ELSE 0 END), 0), '9999999999999') AS entree,
     nm.IDNATUREMOUVEMENT,
-    nm.NATUREMOUVEMENT
+    nm.NATUREMOUVEMENT,
+    TO_CHAR(
+        CASE 
+            WHEN COALESCE(TotalMovementByMonth.total_mouvements, 0) = 0 THEN 0
+            ELSE
+                (COALESCE(SUM(CASE WHEN mp.TYPEMOUVEMENT = 1 THEN 1 ELSE 0 END), 0)
+                / COALESCE(TotalMovementByMonth.total_mouvements, 0)) * 100
+        END, '999.99') AS entree,
+    TO_CHAR(
+        CASE 
+            WHEN COALESCE(TotalMovementByMonth.total_mouvements, 0) = 0 THEN 0
+            ELSE
+                (COALESCE(SUM(CASE WHEN mp.TYPEMOUVEMENT = -1 THEN 1 ELSE 0 END), 0)
+                / COALESCE(TotalMovementByMonth.total_mouvements, 0)) * 100
+        END, '999.99') AS sortie
 FROM 
     AllMonths
 CROSS JOIN 
     NATUREMOUVEMENT nm
 LEFT JOIN 
-    mouvement_physique mp ON EXTRACT(MONTH FROM mp.DATEDEPOT) = AllMonths.mois 
-                            AND EXTRACT(YEAR FROM mp.DATEDEPOT) = AllMonths.annee 
+    mouvement_physique mp ON AllMonths.annee = EXTRACT(YEAR FROM mp.DATEDEPOT)
+                            AND AllMonths.mois = EXTRACT(MONTH FROM mp.DATEDEPOT)
                             AND nm.IDNATUREMOUVEMENT = mp.IDNATUREMOUVEMENT
+LEFT JOIN 
+    TotalMovementByMonth ON AllMonths.annee = TotalMovementByMonth.annee
+                         AND AllMonths.mois = TotalMovementByMonth.mois
 GROUP BY 
-    AllMonths.annee, AllMonths.mois, AllMonths.mois_nom, nm.IDNATUREMOUVEMENT, nm.NATUREMOUVEMENT
+    AllMonths.annee, 
+    AllMonths.mois, 
+    AllMonths.mois_nom, 
+    nm.IDNATUREMOUVEMENT, 
+    nm.NATUREMOUVEMENT, 
+    TotalMovementByMonth.total_mouvements
 ORDER BY 
-    AllMonths.annee, AllMonths.mois, nm.IDNATUREMOUVEMENT;
+    AllMonths.annee, 
+    AllMonths.mois, 
+    nm.IDNATUREMOUVEMENT;
+
+
+
 
 
 -- Rupture des articles
@@ -881,6 +919,29 @@ GROUP BY
     EXTRACT(MONTH FROM v.datedepot),
     TO_CHAR(v.datedepot, 'Month');
 
+
+DROP views vue_depenses_mois;
+CREATE OR REPLACE VIEW vue_depenses_mois AS
+SELECT
+    2024 AS annee,  -- Année fixe pour 2024
+    TO_CHAR(TO_DATE(mois_numero, 'MM'), 'MM') AS mois_numero,
+    TO_CHAR(TO_DATE(mois_numero, 'MM'), 'Month', 'NLS_DATE_LANGUAGE=FRENCH') AS mois_nom,
+    NVL(SUM(CASE WHEN EXTRACT(YEAR FROM NVL(datedepot, TO_DATE(mois_numero || ' 2024', 'MM YYYY'))) = 2024 THEN total ELSE 0 END), 0) AS depenses_mensuelles
+FROM
+    (
+        SELECT LEVEL AS mois_numero
+        FROM dual
+        CONNECT BY LEVEL <= 12
+    ) mois_annee
+LEFT JOIN
+    detailmouvementphysique ON EXTRACT(MONTH FROM NVL(datedepot, TO_DATE(mois_numero || ' 2024', 'MM YYYY'))) = mois_numero
+                            AND EXTRACT(YEAR FROM NVL(datedepot, TO_DATE(mois_numero || ' 2024', 'MM YYYY'))) = 2024
+                            AND typeMouvement = 1  -- Filtrer les mouvements de type entrée
+GROUP BY
+    TO_CHAR(TO_DATE(mois_numero, 'MM'), 'MM'),
+    TO_CHAR(TO_DATE(mois_numero, 'MM'), 'Month', 'NLS_DATE_LANGUAGE=FRENCH')
+ORDER BY
+    TO_NUMBER(TO_CHAR(TO_DATE(mois_numero, 'MM'), 'MM'));
 
 
 
